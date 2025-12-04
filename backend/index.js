@@ -8,10 +8,10 @@ const PORT = process.env.PORT || 6000
 let app = express()
 
 app.get("/",(req,res)=>{
-    res.send("hello world")
+    res.send("Hello World")
 })
 
 app.listen(PORT,()=>{
     connectDb()
-    console.log("server started at port ", PORT)
+    console.log("Server started at port ", PORT)
 })
