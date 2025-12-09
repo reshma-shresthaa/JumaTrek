@@ -1,9 +1,15 @@
 import Listing from "../model/listing.model.js";
 
-// Create a new trek listing
+
 export const createListing = async (req, res) => {
     try {
-        const newListing = new Listing(req.body);
+         const listingData = req.body;
+
+        
+        if (req.files && req.files.length > 0) {
+            listingData.gallery = req.files.map(file => file.path);
+        }
+        const newListing = new Listing(listingData);
         const savedListing = await newListing.save();
         res.status(201).json({
             success: true,
@@ -63,3 +69,41 @@ export const getListingById = async (req, res) => {
         });
     }
 };
+
+export const updateListingGallery = async (req, res) => {
+    try {
+        const listingId = req.params.id;
+
+        // Get uploaded image URLs
+        const newImages = req.files.map(file => file.path);
+
+        const updatedListing = await Listing.findByIdAndUpdate(
+            listingId,
+            {
+                $push: { gallery: { $each: newImages } }
+            },
+            { new: true }
+        );
+
+        if (!updatedListing) {
+            return res.status(404).json({
+                success: false,
+                message: "Listing not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Gallery updated successfully",
+            data: updatedListing
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to update gallery",
+            error: error.message
+        });
+    }
+};
+
