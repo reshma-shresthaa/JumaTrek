@@ -30,8 +30,8 @@ const TripsGrid = () => {
               </div>
               <div className="trip-details">
                 <div className="price">{formatPrice(trek.price)}</div>
-                <Link to={`/booking?trek=${encodeURIComponent(trek.title)}`} className="btn">
-                  <i className="fas fa-arrow-right"></i> Book Now
+                <Link to={`/trek/${trek.id}`} className="btn">
+                  <i className="fas fa-info-circle"></i> Show Details
                 </Link>
               </div>
             </div>
