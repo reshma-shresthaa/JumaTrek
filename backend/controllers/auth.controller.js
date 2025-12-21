@@ -14,7 +14,7 @@ export const signUp=async (req,res) => {
         let token = await genToken(user._id)
         res.cookie("token",token,{
             httpOnly:true,
-            secure:process.env.NODE_ENVIRONMENT = "production",
+            secure:process.env.NODE_ENVIRONMENT ="production",
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
@@ -39,11 +39,11 @@ export const login = async (req,res) => {
         let token = await genToken(user._id)
         res.cookie("token",token,{
             httpOnly:true,
-            secure:process.env.NODE_ENVIRONMENT = "production",
-            sameSite: "strict",
+            secure:process.env.NODE_ENVIRONMENT === "production",
+            sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
-        return res.status(200).json(user)
+        return res.status(201).json(user)
     } catch (error) {
         return res.status(500).json({message:`login error ${error}`})
     }

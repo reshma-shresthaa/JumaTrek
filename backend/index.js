@@ -5,6 +5,7 @@ import authRouter from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
 import bookingRouter from "./routes/booking.route.js";
 import listingRouter from "./routes/listing.route.js";
+import userRouter from "./routes/user.route.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 6000
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use("/api/auth", authRouter)
+app.use("/api/user", userRouter )
 app.use("/api/booking", bookingRouter)
 app.use("/api/listing", listingRouter)
 
