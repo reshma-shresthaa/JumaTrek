@@ -1,4 +1,5 @@
 import Booking from "../model/booking.model.js";
+import { sendBookingConfirmationEmail } from "../utils/emailService.js";
 
 export const createBooking = async (req, res) => {
     try {
@@ -20,6 +21,10 @@ export const createBooking = async (req, res) => {
         const newBooking = new Booking(bookingData);
 
         const savedBooking = await newBooking.save();
+
+        sendBookingConfirmationEmail(savedBooking).catch(err => {
+            console.error("Failed to send confirmation email:", err);
+        });
 
         res.status(201).json({
             success: true,
@@ -65,8 +70,7 @@ export const cancelBooking = async (req, res) => {
             return res.status(404).json({ success: false, message: "Booking not found" });
         }
 
-        // Optional: Check if the user owns the booking (if not admin)
-        // For now, allowing if user matches or just basic check
+       
         if (req.userId && booking.user && booking.user.toString() !== req.userId) {
              return res.status(403).json({ success: false, message: "Not authorized to cancel this booking" });
         }
@@ -93,7 +97,7 @@ export const cancelBooking = async (req, res) => {
 export const updateBookingStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // Expecting { status: 'confirmed' } etc.
+        const { status } = req.body; 
 
         const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
         if (!validStatuses.includes(status)) {

@@ -1,12 +1,12 @@
+import 'dotenv/config';
 import express from "express";
-import dotenv from "dotenv";
 import connectDb from "./config/db.js";
 import authRouter from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
 import bookingRouter from "./routes/booking.route.js";
 import listingRouter from "./routes/listing.route.js";
 import userRouter from "./routes/user.route.js";
-dotenv.config();
+
 
 const PORT = process.env.PORT || 6000
 
@@ -23,6 +23,9 @@ app.use("/api/listing", listingRouter)
 app.get("/",(req,res)=>{
     res.send("hello from server")
 })
+
+
+
 
 app.listen(PORT,()=>{
     connectDb()
