@@ -4,32 +4,20 @@ const API_URL = 'http://localhost:5000/api/auth';
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add a request interceptor to include auth token in requests
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+
 
 export const authService = {
   async login(email, password) {
     try {
       const response = await api.post('/login', { email, password });
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('user', JSON.stringify(response.data));
       }
       return response.data;
     } catch (error) {
@@ -39,10 +27,15 @@ export const authService = {
 
   async signup(userData) {
     try {
-      const response = await api.post('/signup', userData);
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      const payload = {
+        ...userData,
+        contact: userData.contactNo
+      };
+
+      const response = await api.post('/signup', payload);
+      if (response.data) {
+        localStorage.setItem('user', JSON.stringify(response.data));
       }
       return response.data;
     } catch (error) {
@@ -51,7 +44,7 @@ export const authService = {
   },
 
   logout() {
-    localStorage.removeItem('token');
+    api.post('/logout').catch(err => console.error("Logout error", err));
     localStorage.removeItem('user');
   },
 
@@ -61,7 +54,7 @@ export const authService = {
   },
 
   isAuthenticated() {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem('user');
   }
 };
 
