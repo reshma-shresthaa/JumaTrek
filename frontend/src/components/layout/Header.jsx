@@ -1,13 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { authService } from '../../services/api';
+import UserProfile from '../user/UserProfile';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [logoError, setLogoError] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
+
+  // Check authentication state on component mount and when location changes
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(authService.isAuthenticated());
+    };
+    
+    checkAuth();
+    // Listen for storage events to handle login/logout from other tabs
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, [location]);
 
   // Handle scroll to update active section
   useEffect(() => {
@@ -141,15 +159,21 @@ const Header = () => {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link 
-                to="/auth" 
-                className="btn btn-auth" 
-                onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
-              >
-                <i className="fas fa-user"></i> Login / Sign Up
-              </Link>
-            </li>
+            {isAuthenticated ? (
+              <li className="user-profile-container">
+                <UserProfile onLogout={() => setIsAuthenticated(false)} />
+              </li>
+            ) : (
+              <li>
+                <Link 
+                  to="/auth" 
+                  className="btn btn-auth" 
+                  onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
+                >
+                  <i className="fas fa-user"></i> Login / Sign Up
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
         <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
@@ -220,21 +244,21 @@ const Header = () => {
         }
 
         .btn-auth {
-          padding: 8px 16px;
+          padding: 0.5rem 1.25rem;
           border-radius: 6px;
           text-decoration: none;
           font-weight: 500;
           transition: all 0.3s ease;
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          background-color: #2c3e50;
+          gap: 0.5rem;
+          background-color: #4a6fa5;
           color: white;
-          border: 1px solid #2c3e50;
         }
 
         .btn-auth:hover {
-          background-color: #e74c3c;
+          background-color: #3a5a80;
+          transform: translateY(-2px);
           border-color: #e74c3c;
         }
 
