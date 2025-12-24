@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import UserProfile from '../user/UserProfile';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -10,7 +8,6 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
-  const { user } = useAuth();
 
   // Handle scroll to update active section
   useEffect(() => {
@@ -168,17 +165,13 @@ const Header = () => {
               </li>
             ))}
             <li>
-              {user ? (
-                <UserProfile />
-              ) : (
-                <Link 
-                  to="/auth" 
-                  className="btn btn-auth" 
-                  onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
-                >
-                  <i className="fas fa-user"></i> Login / Sign Up
-                </Link>
-              )}
+              <Link 
+                to="/auth" 
+                className="btn btn-auth" 
+                onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              >
+                <i className="fas fa-user"></i> Login / Sign Up
+              </Link>
             </li>
           </ul>
         </nav>
@@ -250,29 +243,22 @@ const Header = () => {
         }
 
         .btn-auth {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
           padding: 8px 16px;
           border-radius: 6px;
           text-decoration: none;
           font-weight: 500;
           transition: all 0.3s ease;
-          background-color: #4a6fa5;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background-color: #2c3e50;
           color: white;
-          border: none;
-          cursor: pointer;
-          font-size: 14px;
+          border: 1px solid #2c3e50;
         }
 
         .btn-auth:hover {
-          background-color: #3a5a80;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-          transform: translateY(-1px);
-        }
-
-        .btn-auth i {
-          font-size: 14px;
+          background-color: #e74c3c;
+          border-color: #e74c3c;
         }
 
         @media (max-width: 768px) {

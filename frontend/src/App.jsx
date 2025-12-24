@@ -1,7 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthProvider } from './contexts/AuthContext';
 import Home from './pages/Home';
 import Booking from './pages/Booking';
 import AllTreks from './pages/AllTreks';
@@ -15,8 +14,7 @@ import './index.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
       <ScrollToTop />
       <ScrollProgress />
       <Header />
@@ -42,8 +40,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      </Router>
-    </AuthProvider>
+    </Router>
   );
 }
 
