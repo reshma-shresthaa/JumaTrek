@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -15,8 +15,8 @@ const api = axios.create({
 export const authService = {
   async login(email, password) {
     try {
-      const response = await api.post('/login', { email, password });
-      if (response.data.token) {
+      const response = await api.post('/auth/login', { email, password });
+      if (response.data) {
         localStorage.setItem('user', JSON.stringify(response.data));
       }
       return response.data;
@@ -33,7 +33,7 @@ export const authService = {
         contact: userData.contactNo
       };
 
-      const response = await api.post('/signup', payload);
+      const response = await api.post('/auth/signup', payload);
       if (response.data) {
         localStorage.setItem('user', JSON.stringify(response.data));
       }
@@ -44,8 +44,21 @@ export const authService = {
   },
 
   logout() {
-    api.post('/logout').catch(err => console.error("Logout error", err));
+    api.post('/auth/logout').catch(err => console.error("Logout error", err));
     localStorage.removeItem('user');
+  },
+
+  async verifySession() {
+    try {
+      const response = await api.get('/user/currentuser');
+      if (response.data) {
+        localStorage.setItem('user', JSON.stringify(response.data));
+      }
+      return response.data;
+    } catch (error) {
+      localStorage.removeItem('user');
+      return null;
+    }
   },
 
   getCurrentUser() {
@@ -75,6 +88,7 @@ export const bookingService = {
     } catch (error) {
       throw error.response?.data?.message || 'Failed to fetch bookings';
     }
+
   }
 };
 

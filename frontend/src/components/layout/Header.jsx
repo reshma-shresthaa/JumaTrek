@@ -8,28 +8,39 @@ const Header = () => {
   const [activeSection, setActiveSection] = useState('');
   const [logoError, setLogoError] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
 
   // Check authentication state on component mount and when location changes
   useEffect(() => {
-    const checkAuth = () => {
-      setIsAuthenticated(authService.isAuthenticated());
+     const fetchAuth = async () => {
+      const auth = authService.isAuthenticated();
+      setIsAuthenticated(auth);
+      if (auth) {
+        try {
+          const currentUser = await authService.verifySession();
+          setUser(currentUser);
+        } catch (err) {
+          console.error('Failed to fetch current user:', err);
+        }
+      } else {
+        setUser(null);
+      }
     };
-    
-    checkAuth();
-    // Listen for storage events to handle login/logout from other tabs
-    window.addEventListener('storage', checkAuth);
-    
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
+
+    fetchAuth();
+
+    window.addEventListener('storage', fetchAuth);
+    return () => window.removeEventListener('storage', fetchAuth);
   }, [location]);
 
-  // Handle scroll to update active section
+  // Scroll listener for active section
   useEffect(() => {
     if (!isHomePage) return;
+
+  
     
     const handleScroll = () => {
       const sections = ['trips', 'training', 'gear', 'seasons', 'about', 'contact'];
@@ -159,9 +170,9 @@ const Header = () => {
                 </Link>
               </li>
             ))}
-            {isAuthenticated ? (
+            {isAuthenticated && user? (
               <li className="user-profile-container">
-                <UserProfile onLogout={() => setIsAuthenticated(false)} />
+                <UserProfile user={user} onLogout={() => setIsAuthenticated(false)} />
               </li>
             ) : (
               <li>
@@ -180,7 +191,7 @@ const Header = () => {
           <i className="fas fa-bars"></i>
         </button>
       </div>
-      <style jsx>{`
+      <style >{`
         #header {
           position: sticky;
           top: 0;

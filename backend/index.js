@@ -9,7 +9,7 @@ import listingRouter from "./routes/listing.route.js";
 import userRouter from "./routes/user.route.js";
 
 
-const PORT = process.env.PORT || 6000
+const PORT = process.env.PORT || 5000
 
 let app = express()
 app.use(express.json())
@@ -21,19 +21,19 @@ app.use(cors({
 
 
 app.use("/api/auth", authRouter)
-app.use("/api/user", userRouter )
+app.use("/api/user", userRouter)
 app.use("/api/booking", bookingRouter)
 app.use("/api/listing", listingRouter)
 
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     res.send("hello from server")
 })
 
 
 
 
-app.listen(PORT,()=>{
+app.listen(PORT, () => {
     connectDb()
     console.log("Server started at port ", PORT)
 })

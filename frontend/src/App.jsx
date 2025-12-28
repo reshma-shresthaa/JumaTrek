@@ -1,3 +1,4 @@
+import React, { useState , useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,8 +12,18 @@ import AuthPage from './pages/AuthPage';
 import ScrollProgress from './components/layout/ScrollProgress';
 import ScrollToTop from './components/layout/ScrollToTop';
 import './index.css';
+import { authService } from './services/api';
 
 function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const currentUser = await authService.verifySession();
+      setUser(currentUser); // update state
+    };
+    fetchUser();
+  }, []);
   return (
     
     <Router>
@@ -34,6 +45,8 @@ function App() {
       <main className="container">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<AuthPage />} />
++         <Route path="/signup" element={<AuthPage />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/all-treks" element={<AllTreks />} />
           <Route path="/trek/:id" element={<TrekDetail />} />

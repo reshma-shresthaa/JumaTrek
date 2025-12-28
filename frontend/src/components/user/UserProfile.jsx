@@ -1,13 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, User as UserIcon } from 'lucide-react';
+import {  LogOut, User as UserIcon } from 'lucide-react';
 import { authService } from '../../services/api';
 
-const UserProfile = () => {
+const UserProfile = ({ user, onLogout }) => {
+  
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  const user = authService.getCurrentUser();
+  // const user = authService.getCurrentUser();
+  
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -41,7 +43,11 @@ const UserProfile = () => {
   if (!user) return null;
 
   // Get first name or use first part of email if name is not available
-  const displayName = user.name ? user.name.split(' ')[0] : user.email.split('@')[0];
+  const displayName = user?.name
+    ? user.name.split(' ')[0]
+    : user?.email
+    ? user.email.split('@')[0]
+    : 'User';
 
   return (
     <div className="user-profile" ref={dropdownRef}>
@@ -52,7 +58,7 @@ const UserProfile = () => {
         aria-expanded={isOpen}
       >
         <div className="user-avatar">
-          {user.name ? user.name.charAt(0).toUpperCase() : <UserIcon size={18} />}
+          {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon size={18} />}
         </div>
         <span className="user-name">{displayName}</span>
         <svg 
@@ -73,7 +79,7 @@ const UserProfile = () => {
       {isOpen && (
         <div className="dropdown-menu">
           <button className="dropdown-item" onClick={handleProfile}>
-            <User size={16} />
+            <user size={16} />
             <span>Profile</span>
           </button>
           <button className="dropdown-item" onClick={handleLogout}>
@@ -83,7 +89,7 @@ const UserProfile = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style >{`
         .user-profile {
           position: relative;
           margin-left: 1rem;

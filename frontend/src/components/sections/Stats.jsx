@@ -97,7 +97,7 @@ const Stats = () => {
           </div>
         </div>
       </div>
-      <style jsx>{`
+      <style >{`
         .stats-section {
           padding: 2rem 0 0;
           position: relative;

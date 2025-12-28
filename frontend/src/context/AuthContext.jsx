@@ -1,19 +1,37 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/api';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        
-        const savedUser = authService.getCurrentUser();
-        if (savedUser) {
-            setUser(savedUser);
-        }
-        setLoading(false);
+        const checkAuth = async () => {
+            try {
+                // First check local storage for immediate UI
+                const savedUser = authService.getCurrentUser();
+                if (savedUser) {
+                    setUser(savedUser);
+                }
+
+                // Then verify with backend
+                const verifiedUser = await authService.verifySession();
+                if (verifiedUser) {
+                    setUser(verifiedUser);
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error("Auth verification failed:", error);
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkAuth();
     }, []);
 
     const login = async (email, password) => {
@@ -41,9 +59,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    const isAuthenticated = () => {
-        return !!user;
-    };
+    const isAuthenticated = !!user;
 
     return (
         <AuthContext.Provider value={{ user, login, signup, logout, loading, isAuthenticated }}>
