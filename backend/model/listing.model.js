@@ -3,9 +3,6 @@ import mongoose from "mongoose";
 const listingSchema = new mongoose.Schema({
     id: {
         type: Number,
-        // Optional: integer ID matching frontend 'id' for easier migration, 
-        // though standard is _id (ObjectId). 
-        // We'll keep it optional or strictly for the 'legacy' id from text file.
     },
     title: {
         type: String,
@@ -33,14 +30,14 @@ const listingSchema = new mongoose.Schema({
         required: true
     },
     maxAltitude: {
-        type: String // Overall max altitude for the trek header
+        type: String 
     },
     bestSeason: {
-        type: [String], // Array of strings, e.g. ["Spring", "Autumn"]
+        type: [String], 
         default: []
     },
     groupSize: {
-        type: String // e.g., "2-12 people"
+        type: String 
     },
     highlights: {
         type: [String],
@@ -63,7 +60,7 @@ const listingSchema = new mongoose.Schema({
         default: []
     },
     gallery: {
-        type: [String], // Array of image URLs
+        type: [String], 
         default: []
     }
 }, { timestamps: true });

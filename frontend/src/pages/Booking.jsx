@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { bookingService, authService } from '../services/api';
 
 const Booking = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+
   const queryParams = new URLSearchParams(location.search);
   const trekName = queryParams.get('trek') || '';
 
@@ -20,11 +24,32 @@ const Booking = () => {
     agreeTerms: false
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   useEffect(() => {
+    if (authLoading) return;
+    
+    if (!authService.isAuthenticated()) {
+      alert("You need to be logged in to book a trek.");
+      navigate('/login');
+      return;
+    }
+
+    
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        phone: user.contact || prev.phone 
+      }));
+    }
+
     if (trekName) {
       setFormData(prev => ({ ...prev, trek: trekName }));
     }
-  }, [trekName]);
+  }, [trekName, navigate, user, isAuthenticated, authLoading]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -34,11 +59,23 @@ const Booking = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Booking submitted:', formData);
-    alert('Thank you for your booking request! We will contact you within 24 hours to confirm.');
-    navigate('/');
+    setError('');
+    setLoading(true);
+  
+    try {
+      await bookingService.createBooking(formData);
+      alert('Thank you for your booking request! You will receive a confirmation email shortly. Please review your details and contact if any updates are required.');
+      navigate('/'); 
+      
+    } catch (err) {
+      console.error("Booking error:", err);
+      setError(err.toString());
+      alert(`Booking failed: ${err}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,6 +87,7 @@ const Booking = () => {
 
       <div className="booking-container">
         <div className="booking-form">
+          {error && <div className="error-message" style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-section">
               <h3><i className="fas fa-user"></i> Personal Information</h3>
@@ -144,6 +182,8 @@ const Booking = () => {
                   name="preferredDate" 
                   value={formData.preferredDate}
                   onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  
                   required 
                 />
               </div>

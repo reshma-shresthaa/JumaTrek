@@ -17,14 +17,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
     },
-    listing:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Listing"
-    },
-    booking:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Booking"
-    },
     role: {
         type: String,
         enum: ["User", "Admin"],

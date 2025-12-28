@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-    // --- Immediate Fields (Matches Frontend) ---
     trekName: {
         type: String,
         required: true

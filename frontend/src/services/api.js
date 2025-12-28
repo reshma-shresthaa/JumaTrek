@@ -58,4 +58,24 @@ export const authService = {
   }
 };
 
+export const bookingService = {
+  async createBooking(bookingData) {
+    try {
+      const response = await api.post('/booking', bookingData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Booking failed';
+    }
+  },
+
+  async getUserBookings() {
+    try {
+      const response = await api.get('/booking/my');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch bookings';
+    }
+  }
+};
+
 export default api;

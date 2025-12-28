@@ -1,31 +1,23 @@
 import Booking from "../model/booking.model.js";
 import { sendBookingConfirmationEmail } from "../utils/emailService.js";
-
 export const createBooking = async (req, res) => {
-    try {
-        
+    try {       
         console.log("Received booking data:", req.body);
-
        
         const { trek, ...otherData } = req.body;
-
         const bookingData = {
             ...otherData,
             trekName: trek 
         };
-
          if (req.userId) {
             bookingData.user = req.userId;
         }
 
         const newBooking = new Booking(bookingData);
-
         const savedBooking = await newBooking.save();
-
         sendBookingConfirmationEmail(savedBooking).catch(err => {
             console.error("Failed to send confirmation email:", err);
         });
-
         res.status(201).json({
             success: true,
             message: "Booking request submitted successfully!",
@@ -69,12 +61,9 @@ export const cancelBooking = async (req, res) => {
         if (!booking) {
             return res.status(404).json({ success: false, message: "Booking not found" });
         }
-
-       
         if (req.userId && booking.user && booking.user.toString() !== req.userId) {
              return res.status(403).json({ success: false, message: "Not authorized to cancel this booking" });
         }
-
         booking.status = 'cancelled';
         await booking.save();
 
