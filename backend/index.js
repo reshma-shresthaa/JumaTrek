@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import bookingRouter from "./routes/booking.route.js";
 import listingRouter from "./routes/listing.route.js";
 import userRouter from "./routes/user.route.js";
+import wishlistRouter from './routes/wishlist.route.js';
 
 
 const PORT = process.env.PORT || 6000
@@ -18,6 +19,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter )
 app.use("/api/booking", bookingRouter)
 app.use("/api/listing", listingRouter)
+app.use("/api/wishlist", wishlistRouter)
 
 
 app.get("/",(req,res)=>{
