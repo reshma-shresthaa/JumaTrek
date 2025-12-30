@@ -1,0 +1,109 @@
+.specialists-section {
+  padding: 60px 0;
+  background: white;
+}
+
+.specialists-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.specialist-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.specialist-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.specialist-header {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.specialist-status {
+  font-size: 0.75rem;
+  color: #718096;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #48bb78;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.specialist-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  border: 3px solid #f7fafc;
+}
+
+.specialist-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 4px;
+}
+
+.specialist-role {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.specialist-desc {
+  font-size: 0.875rem;
+  color: #4a5568;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #4299e1;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.specialists-cta {
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .specialists-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .specialists-grid {
+    grid-template-columns: 1fr;
+  }
+}

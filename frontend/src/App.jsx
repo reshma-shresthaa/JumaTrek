@@ -1,35 +1,110 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Import pages
+import Home from './pages/Home';
+import Booking from './pages/Booking';
+import AllTreks from './pages/AllTreks';
+import TrekDetail from './pages/TrekDetail';
+import UserProfile from './pages/UserProfile';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import AuthPage from './pages/AuthPage';
+import DestinationsPage from './pages/DestinationsPage';
+import ScrollProgress from './components/layout/ScrollProgress';
+import ScrollToTop from './components/layout/ScrollToTop';
+import AboutPage from './pages/AboutPage';
+import GuidesPage from './pages/GuidesPage';
+import ContactPage from './pages/ContactPage';
+import BlogPage from './pages/BlogPage';
+
+// Admin components
+import AdminLogin from './pages/admin/Login';
+import AdminLayout from './components/admin/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import TreksList from './pages/admin/treks/TreksList';
+import AddTrek from './pages/admin/treks/AddTrek';
+import EditTrek from './pages/admin/treks/EditTrek';
+import TrekDetailAdmin from './pages/admin/treks/TrekDetail';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import './index.css';
+import './assets/styles/globals.css';
+import './App.css';
+
+function MainLayout() {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  // Add a simple debug log
+  useEffect(() => {
+    console.log('Current route:', location.pathname);
+  }, [location]);
+
+  // Don't render header/footer for admin routes
+  if (isAdminRoute) {
+    return (
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="treks" element={<TreksList />} />
+          <Route path="treks/add" element={<AddTrek />} />
+          <Route path="treks/:id" element={<TrekDetailAdmin />} />
+          <Route path="treks/edit/:id" element={<EditTrek />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/admin/login" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ScrollToTop />
+      <ScrollProgress />
+      <Header />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <main className={isHome ? '' : 'container'}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/destinations" element={<DestinationsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/guides" element={<GuidesPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/all-treks" element={<AllTreks />} />
+          <Route path="/trek/:id" element={<TrekDetail />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+function App() {
+  return <MainLayout />;
+}
+
+export default App;

@@ -1,0 +1,82 @@
+.trips-section {
+  padding: 40px 0 60px;
+  background: white;
+}
+
+.trips-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+
+.trip-list-item {
+  display: flex;
+  gap: 20px;
+  text-decoration: none;
+  color: inherit;
+  align-items: flex-start;
+}
+
+.trip-thumb {
+  width: 140px;
+  height: 100px;
+  /* matching kimkim small thumbnail look roughly */
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.trip-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trip-info-block {
+  flex: 1;
+}
+
+.trip-item-title {
+  font-family: 'Inter', sans-serif;
+  /* Kimkim uses system font or clean sans */
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.trip-item-title:hover {
+  color: #3182ce;
+}
+
+.trip-item-desc {
+  font-size: 0.95rem;
+  color: #4a5568;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.read-more {
+  font-size: 0.85rem;
+  color: #3182ce;
+  font-weight: 500;
+}
+
+.mt-8 {
+  margin-top: 32px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .trips-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,322 @@
+/* Header - KimKim Inspired Design */
+
+.header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  gap: 2rem;
+}
+
+/* Logo */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  min-width: fit-content;
+}
+
+.logo-link:hover {
+  opacity: 0.8;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px !important;
+  overflow: hidden;
+  background: #000;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.logo__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0 !important;
+  box-shadow: none;
+  display: block;
+}
+
+.logo__fallback {
+  width: 100%;
+  height: 100%;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.brand-tagline {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Navigation */
+.nav {
+  flex: 1;
+  display: flex;
+}
+
+.nav__list {
+  display: flex;
+  list-style: none;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  justify-content: center;
+}
+
+.nav__item {
+  display: flex;
+  align-items: center;
+}
+
+.nav__link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.nav__link:hover {
+  color: var(--accent);
+  background: var(--primary-lighter);
+}
+
+.nav__link--active {
+  color: var(--accent);
+  font-weight: 600;
+  background: rgba(74, 152, 226, 0.1);
+}
+
+.nav__link--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 1.5px;
+}
+
+/* Header Actions */
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn--secondary {
+  background: var(--white);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn--secondary:hover {
+  background: var(--accent);
+  color: var(--white);
+}
+
+.btn--sm {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+}
+
+/* Menu Toggle (Mobile) */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-toggle__icon,
+.menu-toggle__icon::before,
+.menu-toggle__icon::after {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: var(--text-dark);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.menu-toggle__icon::before {
+  content: '';
+  width: 24px;
+  display: block;
+}
+
+.menu-toggle__icon::after {
+  content: '';
+  width: 24px;
+  display: block;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .header__inner {
+    padding: 0.75rem 0;
+    gap: 1rem;
+  }
+
+  .brand-name {
+    font-size: 1.1rem;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--border-light);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .nav--mobile-open {
+    max-height: 400px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .nav--mobile-open .nav__list {
+    flex-direction: column;
+    padding: 1rem 0;
+  }
+
+  .nav--mobile-open .nav__item {
+    width: 100%;
+  }
+
+  .nav__link {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0;
+  }
+
+  .nav__link--active::after {
+    display: none;
+  }
+
+  .nav__link--active {
+    background: var(--primary-lighter);
+    border-left: 3px solid var(--accent);
+    padding-left: calc(1.5rem - 3px);
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .header__actions {
+    display: none;
+  }
+
+  .nav--mobile-open .header__actions {
+    display: flex;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-light);
+  }
+}
+
+@media (max-width: 480px) {
+  .header__inner {
+    padding: 0.5rem 0;
+    gap: 0.75rem;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+  }
+
+  .nav__link {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Scroll effect */
+.header.scrolled {
+  box-shadow: var(--shadow-md);
+}
+
+/* Print styles */
+@media print {
+  .header {
+    position: static;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  .nav {
+    display: flex;
+  }
+}
