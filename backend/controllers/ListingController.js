@@ -25,6 +25,62 @@ export const createListing = async (req, res) => {
     }
 };
 
+export const updateListing = async (req, res) => {
+    try {
+        const listingId = req.params.id;
+        const updateData = req.body;
+
+        // Remove any fields that shouldn't be updated directly (like _id, createdAt, etc.)
+        delete updateData._id;
+        delete updateData.createdAt;
+        delete updateData.updatedAt;
+
+        // Prepare update operations
+        const updateOperations = {};
+
+        // Handle gallery images - ADD to existing gallery instead of replacing
+        if (req.files && req.files.length > 0) {
+            const newImages = req.files.map(file => file.path);
+            updateOperations.$push = { gallery: { $each: newImages } };
+        }
+
+        // Handle other fields - SET them
+        const setFields = { ...updateData };
+        if (Object.keys(setFields).length > 0) {
+            updateOperations.$set = setFields;
+        }
+
+        const updatedListing = await Listing.findByIdAndUpdate(
+            listingId,
+            updateOperations,
+            { 
+                new: true, // Return the updated document
+                runValidators: true // Run schema validators
+            }
+        );
+
+        if (!updatedListing) {
+            return res.status(404).json({
+                success: false,
+                message: "Listing not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Listing updated successfully",
+            data: updatedListing
+        });
+    } catch (error) {
+        console.error("Error updating listing:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to update listing",
+            error: error.message
+        });
+    }
+};
+
 // Get all treks (Lite version for cards)
 export const getAllListings = async (req, res) => {
     try {
@@ -104,42 +160,6 @@ export const updateListingGallery = async (req, res) => {
     }
 };
 
-export const updateListing = async (req, res) => {
-    try {
-        const listingId = req.params.id;
-        const updateData = req.body;
-
-        if (req.files && req.files.length > 0) {
-            updateData.gallery = req.files.map(file => file.path);
-        }
-
-        const updatedListing = await Listing.findByIdAndUpdate(
-            listingId,
-            updateData,
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedListing) {
-            return res.status(404).json({
-                success: false,
-                message: "Listing not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Listing updated successfully",
-            data: updatedListing
-        });
-    } catch (error) {
-        console.error("Error updating listing:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to update listing",
-            error: error.message
-        });
-    }
-};
 
 export const deleteListing = async (req, res) => {
     try {
