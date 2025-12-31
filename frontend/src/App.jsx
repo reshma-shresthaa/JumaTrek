@@ -30,6 +30,7 @@ import AddTrek from './pages/admin/treks/AddTrek';
 import EditTrek from './pages/admin/treks/EditTrek';
 import TrekDetailAdmin from './pages/admin/treks/TrekDetail';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import CustomTrip from './pages/CustomTrip';
 import './index.css';
 import './assets/styles/globals.css';
 import './App.css';
@@ -97,6 +98,7 @@ function MainLayout() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/quiz" element={<TrekQuiz />} />
+          <Route path="/custom-trip" element={<CustomTrip />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

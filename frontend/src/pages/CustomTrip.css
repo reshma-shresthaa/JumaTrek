@@ -1,0 +1,251 @@
+/* Custom Trip Page Styles */
+
+.custom-trip-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.custom-trip-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.custom-trip-header h1 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.custom-trip-header p {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Steps Styling */
+.custom-trip-steps {
+  margin: 2rem 0 3rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ant-steps {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ant-steps-item-title {
+  font-weight: 500;
+}
+
+/* Form Styling */
+.custom-trip-form {
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.step-content h3 {
+  color: #2c3e50;
+  margin: 1.5rem 0 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.step-content h3:first-child {
+  margin-top: 0;
+}
+
+/* Form Elements */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  border: 1px solid #d1d5db !important;
+  transition: all 0.3s ease;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-number-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: #4299e1 !important;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2) !important;
+}
+
+/* Budget Slider */
+.budget-slider {
+  margin: 1.5rem 0;
+}
+
+.budget-range {
+  display: flex;
+  justify-content: space-between;
+  color: #718096;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* Navigation Buttons */
+.form-navigation {
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 8px 20px;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary {
+  background: #3182ce;
+  border-color: #3182ce;
+}
+
+.ant-btn-primary:hover {
+  background: #2c5282;
+  border-color: #2c5282;
+}
+
+.ant-btn:not(.ant-btn-primary) {
+  border: 1px solid #d1d5db;
+  color: #4a5568;
+}
+
+.ant-btn:not(.ant-btn-primary):hover {
+  color: #3182ce;
+  border-color: #3182ce;
+}
+
+/* Info Cards */
+.custom-trip-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.info-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+  font-size: 2.5rem;
+  color: #3182ce;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.info-card h4 {
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+  font-size: 1.2rem;
+}
+
+.info-card p {
+  color: #718096;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .custom-trip-container {
+    padding: 1rem;
+  }
+  
+  .custom-trip-header h1 {
+    font-size: 2rem;
+  }
+  
+  .custom-trip-form {
+    padding: 1.5rem;
+  }
+  
+  .form-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .form-navigation .ant-btn {
+    width: 100%;
+    margin: 0 !important;
+  }
+  
+  .custom-trip-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animation for form steps */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-content {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
