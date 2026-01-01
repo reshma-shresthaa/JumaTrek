@@ -30,21 +30,21 @@ export const updateListing = async (req, res) => {
         const listingId = req.params.id;
         const updateData = req.body;
 
-        // Remove any fields that shouldn't be updated directly (like _id, createdAt, etc.)
+        
         delete updateData._id;
         delete updateData.createdAt;
         delete updateData.updatedAt;
 
-        // Prepare update operations
+        
         const updateOperations = {};
 
-        // Handle gallery images - ADD to existing gallery instead of replacing
+        
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => file.path);
             updateOperations.$push = { gallery: { $each: newImages } };
         }
 
-        // Handle other fields - SET them
+        
         const setFields = { ...updateData };
         if (Object.keys(setFields).length > 0) {
             updateOperations.$set = setFields;
@@ -54,8 +54,8 @@ export const updateListing = async (req, res) => {
             listingId,
             updateOperations,
             { 
-                new: true, // Return the updated document
-                runValidators: true // Run schema validators
+                new: true, 
+                runValidators: true 
             }
         );
 
@@ -81,13 +81,95 @@ export const updateListing = async (req, res) => {
     }
 };
 
-// Get all treks (Lite version for cards)
+
 export const getAllListings = async (req, res) => {
     try {
-        const listings = await Listing.find({}).sort({ createdAt: -1 });
+        // Extract query parameters
+        const {
+            region,
+            difficulty,
+            duration,
+            minPrice,
+            maxPrice,
+            page = 1,
+            limit = 10,
+            sort = '-createdAt'
+        } = req.query;
+
+        // Build filter object dynamically
+        const filter = {};
+
+        // Region filter (ignore "All Regions" or empty)
+        if (region && region !== 'All Regions' && region.trim() !== '') {
+            filter.region = region;
+        }
+
+        // Difficulty filter (ignore "All Levels" or empty)
+        if (difficulty && difficulty !== 'All Levels' && difficulty.trim() !== '') {
+            filter.difficulty = difficulty;
+        }
+
+        // Duration filter (ignore "Any Duration" or empty)
+        if (duration && duration !== 'Any Duration' && duration.trim() !== '') {
+            filter.duration = parseInt(duration);
+        }
+
+        // Price range filter
+        if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) {
+                filter.price.$gte = parseFloat(minPrice);
+            }
+            if (maxPrice) {
+                filter.price.$lte = parseFloat(maxPrice);
+            }
+        }
+
+        // Pagination
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        // Sorting options
+        let sortOptions = {};
+        switch (sort) {
+            case 'price-asc':
+                sortOptions = { price: 1 };
+                break;
+            case 'price-desc':
+                sortOptions = { price: -1 };
+                break;
+            case 'duration-asc':
+                sortOptions = { duration: 1 };
+                break;
+            case 'duration-desc':
+                sortOptions = { duration: -1 };
+                break;
+            case 'title-asc':
+                sortOptions = { title: 1 };
+                break;
+            case 'title-desc':
+                sortOptions = { title: -1 };
+                break;
+            default:
+                sortOptions = { createdAt: -1 }; // Newest first by default
+        }
+
+        // Execute query with filters, pagination, and sorting
+        const listings = await Listing.find(filter)
+            .sort(sortOptions)
+            .limit(limitNum)
+            .skip(skip);
+
+        // Get total count for pagination metadata
+        const total = await Listing.countDocuments(filter);
+
         res.status(200).json({
             success: true,
             count: listings.length,
+            total: total,
+            page: pageNum,
+            pages: Math.ceil(total / limitNum),
             data: listings
         });
     } catch (error) {
@@ -100,7 +182,7 @@ export const getAllListings = async (req, res) => {
     }
 };
 
-// Get single trek by ID (or Title slug in future)
+
 export const getListingById = async (req, res) => {
     try {
         const listing = await Listing.findById(req.params.id);

@@ -3,6 +3,7 @@ import isAdmin from '../middleware/isAdmin.js';
 import { deleteUser, getAllBookings, getAllUsers, getDashboardStats, updateBookingStatusAdmin, adminLogin } from '../controllers/AdminController.js';
 import { createListing, deleteListing, getAllListings, getListingById, updateListing, updateListingGallery } from '../controllers/ListingController.js';
 import upload from '../middleware/multer.js';
+import { validateListingFilters } from '../middleware/validation.js';
 
 const adminRouter = express.Router();
 
@@ -21,5 +22,6 @@ adminRouter.get("/listing", isAdmin, getAllListings);
 adminRouter.get("/listing/:id", isAdmin, getListingById);
 adminRouter.put("/listing/:id", isAdmin, upload.array("images",10),  updateListing);
 adminRouter.delete("/listing/:id", isAdmin, deleteListing);
+adminRouter.get("/listing", validateListingFilters, getAllListings)
 
 export default adminRouter;
