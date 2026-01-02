@@ -467,26 +467,16 @@ const CustomTrip = () => {
       // If user is authenticated, proceed with submission
       const submissionData = {
         ...formValues,
-        // Ensure we have all required fields with defaults
-        contactInfo: {
-          name: formValues.contactInfo?.name || '',
-          email: formValues.contactInfo?.email || '',
-          phone: formValues.contactInfo?.phone || '',
-          country: formValues.contactInfo?.country || '',
-          emergencyContact: {
-            name: formValues.contactInfo?.emergencyContact?.name || '',
-            relationship: formValues.contactInfo?.emergencyContact?.relationship || '',
-            phone: formValues.contactInfo?.emergencyContact?.phone || ''
-          }
-        },
         ...formData,
-        ...formValues,
         contactInfo: {
-          ...formData.contactInfo,
-          ...(formValues.contactInfo || {}),
+          name: formValues.contactInfo?.name || formData.contactInfo?.name || '',
+          email: formValues.contactInfo?.email || formData.contactInfo?.email || '',
+          phone: formValues.contactInfo?.phone || formData.contactInfo?.phone || '',
+          country: formValues.contactInfo?.country || formData.contactInfo?.country || '',
           emergencyContact: {
-            ...(formData.contactInfo?.emergencyContact || {}),
-            ...(formValues.emergencyContact || {})
+            name: formValues.contactInfo?.emergencyContact?.name || formData.contactInfo?.emergencyContact?.name || '',
+            relationship: formValues.contactInfo?.emergencyContact?.relationship || formData.contactInfo?.emergencyContact?.relationship || '',
+            phone: formValues.contactInfo?.emergencyContact?.phone || formData.contactInfo?.emergencyContact?.phone || ''
           }
         },
         termsAgreed: formValues.termsAgreed || false
