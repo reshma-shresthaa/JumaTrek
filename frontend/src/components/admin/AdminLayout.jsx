@@ -1,32 +1,44 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu, theme, Avatar, Dropdown, Space } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
   TeamOutlined,
-  PictureOutlined,
   BookOutlined,
+  CalendarOutlined,
+  FileTextOutlined,
   MessageOutlined,
-  SettingOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   HomeOutlined
 } from '@ant-design/icons';
+import { adminService } from '../../services/adminApi';
 
 const { Header, Sider, Content } = Layout;
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [adminUser, setAdminUser] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  useEffect(() => {
+    // Check if user is authenticated
+    const admin = adminService.getCurrentAdmin();
+    if (!admin) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    setAdminUser(admin);
+  }, [navigate]);
+
   const handleLogout = () => {
-    // Handle logout logic
-    localStorage.removeItem('token');
+    adminService.logout();
     navigate('/admin/login');
   };
 
@@ -48,6 +60,32 @@ const AdminLayout = () => {
     />
   );
 
+  // Get current selected key based on pathname
+  const getSelectedKey = () => {
+    const path = location.pathname;
+    if (path === '/admin' || path === '/admin/') return '1';
+    if (path.includes('/admin/treks')) return '2';
+    if (path.includes('/admin/users')) return '3';
+    if (path.includes('/admin/bookings')) return '4';
+    if (path.includes('/admin/guides')) return '5';
+    if (path.includes('/admin/blogs')) return '6';
+    if (path.includes('/admin/messages')) return '7';
+    return '1';
+  };
+
+  // Get open keys for submenu
+  const getOpenKeys = () => {
+    const path = location.pathname;
+    const openKeys = [];
+    if (path.includes('/admin/treks')) openKeys.push('treks');
+    if (path.includes('/admin/users')) openKeys.push('users');
+    if (path.includes('/admin/bookings')) openKeys.push('bookings');
+    if (path.includes('/admin/guides')) openKeys.push('guides');
+    if (path.includes('/admin/blogs')) openKeys.push('blogs');
+    if (path.includes('/admin/messages')) openKeys.push('messages');
+    return openKeys;
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider trigger={null} collapsible collapsed={collapsed} width={250}>
@@ -59,7 +97,8 @@ const AdminLayout = () => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={['1']}
+          selectedKeys={[getSelectedKey()]}
+          defaultOpenKeys={getOpenKeys()}
           items={[
             {
               key: '1',
@@ -67,61 +106,54 @@ const AdminLayout = () => {
               label: <Link to="/admin">Dashboard</Link>,
             },
             {
-              key: '2',
+              key: 'treks',
               icon: <BookOutlined />,
               label: 'Treks',
               children: [
-                { key: '2-1', label: <Link to="/admin/treks">All Treks</Link> },
+                { key: '2', label: <Link to="/admin/treks">All Treks</Link> },
                 { key: '2-2', label: <Link to="/admin/treks/add">Add New Trek</Link> },
-                { key: '2-3', label: <Link to="/admin/trek-categories">Categories</Link> },
-                { key: '2-4', label: <Link to="/admin/trek-regions">Regions</Link> },
               ],
             },
             {
-              key: '3',
+              key: 'users',
               icon: <UserOutlined />,
               label: 'Users',
               children: [
-                { key: '3-1', label: <Link to="/admin/users">All Users</Link> },
-                { key: '3-2', label: <Link to="/admin/users/add">Add New User</Link> },
-                { key: '3-3', label: <Link to="/admin/user-roles">User Roles</Link> },
+                { key: '3', label: <Link to="/admin/users">All Users</Link> },
               ],
             },
             {
-              key: '4',
+              key: 'bookings',
+              icon: <CalendarOutlined />,
+              label: 'Bookings',
+              children: [
+                { key: '4', label: <Link to="/admin/bookings">All Bookings</Link> },
+              ],
+            },
+            {
+              key: 'guides',
               icon: <TeamOutlined />,
               label: 'Guides',
               children: [
-                { key: '4-1', label: <Link to="/admin/guides">All Guides</Link> },
-                { key: '4-2', label: <Link to="/admin/guides/add">Add Guide</Link> },
+                { key: '5', label: <Link to="/admin/guides">All Guides</Link> },
+                { key: '5-2', label: <Link to="/admin/guides/add">Add Guide</Link> },
               ],
             },
             {
-              key: '5',
-              icon: <PictureOutlined />,
-              label: 'Media',
+              key: 'blogs',
+              icon: <FileTextOutlined />,
+              label: 'Blogs',
               children: [
-                { key: '5-1', label: <Link to="/admin/media">Media Library</Link> },
-                { key: '5-2', label: <Link to="/admin/media/upload">Upload</Link> },
+                { key: '6', label: <Link to="/admin/blogs">All Blogs</Link> },
+                { key: '6-2', label: <Link to="/admin/blogs/add">Add Blog</Link> },
               ],
             },
             {
-              key: '6',
+              key: 'messages',
               icon: <MessageOutlined />,
               label: 'Messages',
               children: [
-                { key: '6-1', label: <Link to="/admin/messages">Inbox</Link> },
-                { key: '6-2', label: <Link to="/admin/contact-forms">Contact Forms</Link> },
-              ],
-            },
-            {
-              key: '7',
-              icon: <SettingOutlined />,
-              label: 'Settings',
-              children: [
-                { key: '7-1', label: <Link to="/admin/settings/general">General</Link> },
-                { key: '7-2', label: <Link to="/admin/settings/seo">SEO</Link> },
-                { key: '7-3', label: <Link to="/admin/settings/email">Email</Link> },
+                { key: '7', label: <Link to="/admin/messages">Inbox</Link> },
               ],
             },
           ]}
@@ -132,16 +164,17 @@ const AdminLayout = () => {
           {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
             className: 'trigger',
             onClick: () => setCollapsed(!collapsed),
-            style: { fontSize: '18px', padding: '0 24px' },
+            style: { fontSize: '18px', padding: '0 24px', cursor: 'pointer' },
           })}
           <div style={{ marginRight: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link to="/" target="_blank" style={{ marginRight: '16px' }}>
-              <HomeOutlined style={{ fontSize: '18px' }} /> View Site
+            <Link to="/" target="_blank" style={{ marginRight: '16px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <HomeOutlined style={{ fontSize: '18px' }} />
+              <span>View Site</span>
             </Link>
             <Dropdown overlay={userMenu} placement="bottomRight">
               <Space style={{ cursor: 'pointer' }}>
                 <Avatar icon={<UserOutlined />} />
-                <span>Admin User</span>
+                <span>{adminUser?.name || 'Admin User'}</span>
               </Space>
             </Dropdown>
           </div>

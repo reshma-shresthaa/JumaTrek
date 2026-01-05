@@ -31,6 +31,18 @@ import EditTrek from './pages/admin/treks/EditTrek';
 import TrekDetailAdmin from './pages/admin/treks/TrekDetail';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import CustomTrip from './pages/CustomTrip';
+
+// New Admin Pages
+import UsersList from './pages/admin/users/UsersList';
+import BookingsList from './pages/admin/bookings/BookingsList';
+import GuidesList from './pages/admin/guides/GuidesList';
+import AddGuide from './pages/admin/guides/AddGuide';
+import EditGuide from './pages/admin/guides/EditGuide';
+import BlogsList from './pages/admin/blogs/BlogsList';
+import AddBlog from './pages/admin/blogs/AddBlog';
+import EditBlog from './pages/admin/blogs/EditBlog';
+import ContactMessagesList from './pages/admin/messages/ContactMessagesList';
+
 import './index.css';
 import './assets/styles/globals.css';
 import './App.css';
@@ -50,19 +62,25 @@ function MainLayout() {
     return (
       <Routes>
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<Dashboard />} />
-          <Route path="treks" element={<TreksList />} />
-          <Route path="treks/add" element={<AddTrek />} />
-          <Route path="treks/:id" element={<TrekDetailAdmin />} />
-          <Route path="treks/edit/:id" element={<EditTrek />} />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="treks" element={<TreksList />} />
+            <Route path="treks/add" element={<AddTrek />} />
+            <Route path="treks/:id" element={<TrekDetailAdmin />} />
+            <Route path="treks/edit/:id" element={<EditTrek />} />
+            <Route path="users" element={<UsersList />} />
+            <Route path="bookings" element={<BookingsList />} />
+            <Route path="guides" element={<GuidesList />} />
+            <Route path="guides/add" element={<AddGuide />} />
+            <Route path="guides/edit/:id" element={<EditGuide />} />
+            <Route path="blogs" element={<BlogsList />} />
+            <Route path="blogs/add" element={<AddBlog />} />
+            <Route path="blogs/edit/:id" element={<EditBlog />} />
+            <Route path="messages" element={<ContactMessagesList />} />
+          </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/admin/login" replace />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );
   }

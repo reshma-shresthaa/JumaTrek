@@ -356,30 +356,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Quick Actions */}
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-        <Col span={24}>
-          <Card title="Quick Actions">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-              <Button type="primary" icon={<BookOutlined />}>
-                Add New Trek
-              </Button>
-              <Button icon={<UserOutlined />}>
-                Add New User
-              </Button>
-              <Button icon={<TeamOutlined />}>
-                Manage Guides
-              </Button>
-              <Button icon={<MessageOutlined />}>
-                View Messages
-              </Button>
-              <Button icon={<DollarOutlined />}>
-                View Revenue Report
-              </Button>
-            </div>
-          </Card>
-        </Col>
-      </Row>
     </div>
   );
 };

@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  Form, 
-  Input, 
-  Button, 
-  Card, 
-  Typography, 
-  Alert, 
-  Divider, 
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  Typography,
+  Alert,
+  Divider,
   Checkbox,
-  message
+  message,
 } from 'antd';
-import { 
-  UserOutlined, 
+import {
+  UserOutlined,
   LockOutlined,
-  ArrowLeftOutlined
+  ArrowLeftOutlined,
 } from '@ant-design/icons';
 
+import { adminService } from '../../services/adminApi';
 
 const { Title, Text } = Typography;
 
@@ -25,103 +26,103 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  
-
   const onFinish = async (values) => {
     setLoading(true);
     setError('');
-    
+
     try {
-      // Simulate API call
-      console.log('Attemping login with:', values.email);
-      const response = await authService.login(values.email, values.password);
+      console.log('Attempting admin login:', values.email);
+
+      const response = await adminService.login(
+        values.email,
+        values.password
+      );
+
       console.log('Login response:', response);
-      
-      if (response.role === 'Admin') {
-        localStorage.setItem('adminToken', JSON.stringify(response));
+
+      if (response?.success && response?.user?.role === 'Admin') {
         message.success('Login successful!');
-        navigate('/admin');
+        // Use window.location.href for a full page reload to ensure proper state initialization
+        window.location.href = '/admin';
       } else {
         setError('Access denied. Admin privileges required.');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err || 'An error occurred during login. Please try again.');
+      setError(
+        typeof err === 'string' ? err : 'An error occurred during login. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#f0f2f5',
-      padding: '20px',
-      backgroundImage: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '420px',
-        margin: '0 auto'
-      }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundImage: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        padding: '20px',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: '420px' }}>
+        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <Title level={2} style={{ marginBottom: '8px', color: '#1890ff' }}>
             JumaTrek Admin
           </Title>
-          <Text type="secondary" style={{ fontSize: '16px' }}>
-            Sign in to your admin account
-          </Text>
+          <Text type="secondary">Sign in to your admin account</Text>
         </div>
 
-        <Card 
-          className="shadow-lg"
+        <Card
           style={{
             borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-            border: 'none'
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            border: 'none',
           }}
         >
-          <Button 
-            type="text" 
-            icon={<ArrowLeftOutlined />} 
-            className="mb-4"
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/')}
           >
             Back to Home
           </Button>
-          
+
+          {/* Error message */}
           {error && (
-            <Alert 
-              message={error} 
-              type="error" 
-              showIcon 
-              className="mb-6" 
-              closable 
+            <Alert
+              message={error}
+              type="error"
+              showIcon
+              closable
+              style={{ marginTop: '16px' }}
               onClose={() => setError('')}
             />
           )}
-          
+
+          {/* Login Form */}
           <Form
-            name="login"
+            name="admin-login"
             layout="vertical"
-            initialValues={{ remember: true }}
             onFinish={onFinish}
             size="large"
-            style={{
-              marginTop: '24px'
-            }}
+            style={{ marginTop: '24px' }}
           >
             <Form.Item
-              name="username"
-              rules={[{ required: true, message: 'Please input your username!' }]}
+              name="email"
+              rules={[
+                { required: true, message: 'Please input your email!' },
+                { type: 'email', message: 'Please enter a valid email!' }
+              ]}
             >
-              <Input 
-                prefix={<UserOutlined className="text-gray-400" />} 
-                placeholder="Username" 
-                autoComplete="username"
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="Email"
+                autoComplete="email"
               />
             </Form.Item>
 
@@ -130,71 +131,62 @@ const AdminLogin = () => {
               rules={[{ required: true, message: 'Please input your password!' }]}
             >
               <Input.Password
-                prefix={<LockOutlined className="text-gray-400" />}
-                type="password"
+                prefix={<LockOutlined />}
                 placeholder="Password"
                 autoComplete="current-password"
               />
             </Form.Item>
 
-            <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '24px'
-          }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '16px',
+              }}
+            >
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>Remember me</Checkbox>
               </Form.Item>
 
-              <Link to="/admin/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
-                Forgot password?
-              </Link>
+              <Link to="/admin/forgot-password">Forgot password?</Link>
             </div>
 
-            <Form.Item className="mt-6">
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                className="w-full" 
-                size="large"
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
                 loading={loading}
               >
                 Sign in
               </Button>
             </Form.Item>
           </Form>
-          
-          <Divider style={{ margin: '24px 0' }}>Or</Divider>
-          
+
+          <Divider>Or</Divider>
+
           <div style={{ textAlign: 'center' }}>
-            <Text type="secondary" style={{ fontSize: '14px' }}>
-              Having trouble signing in?{' '}
-              <Link to="/admin/contact-support" style={{ color: '#1890ff' }}>
-                Contact support
-              </Link>
+            <Text type="secondary">
+              Having trouble?{' '}
+              <Link to="/admin/contact-support">Contact support</Link>
             </Text>
           </div>
         </Card>
-        
-        <div style={{
-          textAlign: 'center',
-          marginTop: '32px',
-          padding: '16px',
-          backgroundColor: 'rgba(0, 0, 0, 0.02)',
-          borderRadius: '8px',
-          border: '1px solid rgba(0, 0, 0, 0.06)'
-        }}>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
-            © {new Date().getFullYear()} JumaTrek. All rights reserved.
-          </Text>
+
+        {/* Footer */}
+        <div
+          style={{
+            textAlign: 'center',
+            marginTop: '24px',
+            fontSize: '12px',
+            color: '#888',
+          }}
+        >
+          © {new Date().getFullYear()} JumaTrek. All rights reserved.
         </div>
       </div>
     </div>
   );
 };
-
-
-
 
 export default AdminLogin;
