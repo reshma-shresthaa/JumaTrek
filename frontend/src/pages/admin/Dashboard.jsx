@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from 'react';
-<<<<<<< HEAD
 import { Row, Col, Card, Statistic, Table, Tag, Progress, Button, message } from 'antd';
-=======
-import { Row, Col, Card, Statistic, Table, Tag, Progress, Button } from 'antd';
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
 import { 
   UserOutlined, 
   BookOutlined, 
@@ -18,10 +14,7 @@ import {
 } from '@ant-design/icons';
 import { Line, Pie } from '@ant-design/charts';
 import { Link } from 'react-router-dom';
-<<<<<<< HEAD
 import { adminService } from '../../services/adminApi';
-=======
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -34,7 +27,6 @@ const Dashboard = () => {
     conversionRate: 0,
   });
 
-<<<<<<< HEAD
   const [revenueData, setRevenueData] = useState([
     { month: 'Jan', revenue: 0 },
     { month: 'Feb', revenue: 0 },
@@ -126,87 +118,6 @@ const Dashboard = () => {
     fetchDashboardData();
   };
 
-=======
-  const [recentBookings, setRecentBookings] = useState([]);
-  const [recentUsers, setRecentUsers] = useState([]);
-
-  // Mock data - replace with actual API calls
-  useEffect(() => {
-    // Simulate API call
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Mock data
-        setStats({
-          totalUsers: 1245,
-          totalTreks: 28,
-          totalBookings: 324,
-          activeGuides: 15,
-          revenue: 45230,
-          conversionRate: 68,
-        });
-
-        setRecentBookings([
-          {
-            id: 'BK001',
-            trek: 'Everest Base Camp',
-            user: 'John Doe',
-            date: '2025-01-15',
-            status: 'confirmed',
-            amount: 1500,
-          },
-          {
-            id: 'BK002',
-            trek: 'Annapurna Circuit',
-            user: 'Jane Smith',
-            date: '2025-01-14',
-            status: 'pending',
-            amount: 1250,
-          },
-          {
-            id: 'BK003',
-            trek: 'Langtang Valley',
-            user: 'Robert Johnson',
-            date: '2025-01-13',
-            status: 'cancelled',
-            amount: 980,
-          },
-          {
-            id: 'BK004',
-            trek: 'Manaslu Circuit',
-            user: 'Emily Davis',
-            date: '2025-01-12',
-            status: 'confirmed',
-            amount: 1350,
-          },
-          {
-            id: 'BK005',
-            trek: 'Upper Mustang',
-            user: 'Michael Brown',
-            date: '2025-01-11',
-            status: 'completed',
-            amount: 1750,
-          },
-        ]);
-
-        setRecentUsers([
-          { id: 1, name: 'John Doe', email: 'john@example.com', joinDate: '2025-01-10' },
-          { id: 2, name: 'Jane Smith', email: 'jane@example.com', joinDate: '2025-01-09' },
-          { id: 3, name: 'Robert Johnson', email: 'robert@example.com', joinDate: '2025-01-08' },
-          { id: 4, name: 'Emily Davis', email: 'emily@example.com', joinDate: '2025-01-07' },
-          { id: 5, name: 'Michael Brown', email: 'michael@example.com', joinDate: '2025-01-06' },
-        ]);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
   const bookingColumns = [
     {
       title: 'Booking ID',
@@ -271,36 +182,10 @@ const Dashboard = () => {
     },
   ];
 
-<<<<<<< HEAD
   const configRevenue = {
     data: revenueData,
     xField: 'month',
     yField: 'revenue',
-=======
-  // Chart data
-  const revenueData = [
-    { month: 'Jan', value: 12000 },
-    { month: 'Feb', value: 15000 },
-    { month: 'Mar', value: 18000 },
-    { month: 'Apr', value: 25000 },
-    { month: 'May', value: 32000 },
-    { month: 'Jun', value: 40000 },
-    { month: 'Jul', value: 50000 },
-  ];
-
-  const trekDistributionData = [
-    { type: 'Everest Region', value: 35 },
-    { type: 'Annapurna Region', value: 25 },
-    { type: 'Langtang Region', value: 20 },
-    { type: 'Manaslu Region', value: 15 },
-    { type: 'Other Regions', value: 5 },
-  ];
-
-  const configRevenue = {
-    data: revenueData,
-    xField: 'month',
-    yField: 'value',
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
     point: {
       size: 5,
       shape: 'diamond',
@@ -312,15 +197,9 @@ const Dashboard = () => {
     },
   };
 
-<<<<<<< HEAD
   const configBookingStatus = {
     appendPadding: 10,
     data: bookingStatusData,
-=======
-  const configTrekDistribution = {
-    appendPadding: 10,
-    data: trekDistributionData,
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
     angleField: 'value',
     colorField: 'type',
     radius: 0.8,
@@ -328,10 +207,7 @@ const Dashboard = () => {
       type: 'outer',
       content: '{name} {percentage}',
     },
-<<<<<<< HEAD
     color: ['#52c41a', '#faad14', '#ff4d4f'], // green, orange, red
-=======
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
     interactions: [
       {
         type: 'element-active',
@@ -341,7 +217,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-<<<<<<< HEAD
       <div className="dashboard-header" style={{ 
         marginBottom: '24px',
         display: 'flex',
@@ -356,15 +231,6 @@ const Dashboard = () => {
         >
           Refresh
         </Button>
-=======
-      <div className="dashboard-header" style={{ marginBottom: '24px' }}>
-        <h2>Dashboard</h2>
-        <div>
-          <Button type="primary" icon={<ReloadOutlined />} onClick={() => window.location.reload()}>
-            Refresh
-          </Button>
-        </div>
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
       </div>
 
       {/* Stats Cards */}
@@ -382,13 +248,8 @@ const Dashboard = () => {
               }
             />
             <div style={{ marginTop: '8px' }}>
-<<<<<<< HEAD
               <Progress percent={100} size="small" status="active" showInfo={false} />
               <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Total registered users</div>
-=======
-              <Progress percent={65} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+120 from last month</div>
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
             </div>
           </Card>
         </Col>
@@ -400,13 +261,8 @@ const Dashboard = () => {
               prefix={<BookOutlined />}
             />
             <div style={{ marginTop: '8px' }}>
-<<<<<<< HEAD
               <Progress percent={100} size="small" status="active" showInfo={false} />
               <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Total treks available</div>
-=======
-              <Progress percent={45} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+5 from last month</div>
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
             </div>
           </Card>
         </Col>
@@ -423,13 +279,8 @@ const Dashboard = () => {
               }
             />
             <div style={{ marginTop: '8px' }}>
-<<<<<<< HEAD
               <Progress percent={stats.conversionRate || 0} size="small" status="active" showInfo={false} />
               <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{stats.conversionRate}% booking conversion rate</div>
-=======
-              <Progress percent={78} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+24 from last month</div>
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
             </div>
           </Card>
         </Col>
@@ -441,13 +292,8 @@ const Dashboard = () => {
               prefix={<TeamOutlined />}
             />
             <div style={{ marginTop: '8px' }}>
-<<<<<<< HEAD
               <Progress percent={100} size="small" status="active" showInfo={false} />
               <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Active team members</div>
-=======
-              <Progress percent={90} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+3 from last month</div>
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
             </div>
           </Card>
         </Col>
@@ -472,15 +318,9 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col xs={24} md={8}>
-<<<<<<< HEAD
           <Card title="Booking Status">
             <div style={{ height: '300px' }}>
               <Pie {...configBookingStatus} />
-=======
-          <Card title="Trek Distribution">
-            <div style={{ height: '300px' }}>
-              <Pie {...configTrekDistribution} />
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
             </div>
           </Card>
         </Col>
@@ -518,33 +358,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-<<<<<<< HEAD
-=======
-      {/* Quick Actions */}
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-        <Col span={24}>
-          <Card title="Quick Actions">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-              <Button type="primary" icon={<BookOutlined />}>
-                Add New Trek
-              </Button>
-              <Button icon={<UserOutlined />}>
-                Add New User
-              </Button>
-              <Button icon={<TeamOutlined />}>
-                Manage Guides
-              </Button>
-              <Button icon={<MessageOutlined />}>
-                View Messages
-              </Button>
-              <Button icon={<DollarOutlined />}>
-                View Revenue Report
-              </Button>
-            </div>
-          </Card>
-        </Col>
-      </Row>
->>>>>>> ba1716b091cbc3d24070bbfef176a188a9a4f439
     </div>
   );
 };

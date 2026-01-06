@@ -23,6 +23,7 @@ const { Header, Sider, Content } = Layout;
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
+  const [openKeys, setOpenKeys] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -69,19 +70,33 @@ const AdminLayout = () => {
     return '1';
   };
 
-  // Get open keys for submenu
-  const getOpenKeys = () => {
-    const path = location.pathname;
-    const openKeys = [];
-    if (path.includes('/admin/custom-requests')) openKeys.push('custom-requests');
-    if (path.includes('/admin/treks')) openKeys.push('treks');
-    if (path.includes('/admin/users')) openKeys.push('users');
-    if (path.includes('/admin/bookings')) openKeys.push('bookings');
-    if (path.includes('/admin/guides')) openKeys.push('guides');
-    if (path.includes('/admin/blogs')) openKeys.push('blogs');
-    if (path.includes('/admin/messages')) openKeys.push('messages');
-    return openKeys;
+  // Handle submenu open/close
+  const onOpenChange = (keys) => {
+    const latestOpenKey = keys.find(key => openKeys.indexOf(key) === -1);
+    // Find the root submenu key
+    const rootSubmenuKeys = ['custom-requests', 'treks', 'users', 'bookings', 'guides', 'blogs', 'messages'];
+    
+    if (rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+      setOpenKeys(keys);
+    } else {
+      setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+    }
   };
+
+  // Set initial open keys based on current path
+  useEffect(() => {
+    const path = location.pathname;
+    const newOpenKeys = [];
+    if (path.includes('/admin/custom-requests')) newOpenKeys.push('custom-requests');
+    else if (path.includes('/admin/treks')) newOpenKeys.push('treks');
+    else if (path.includes('/admin/users')) newOpenKeys.push('users');
+    else if (path.includes('/admin/bookings')) newOpenKeys.push('bookings');
+    else if (path.includes('/admin/guides')) newOpenKeys.push('guides');
+    else if (path.includes('/admin/blogs')) newOpenKeys.push('blogs');
+    else if (path.includes('/admin/messages')) newOpenKeys.push('messages');
+    
+    setOpenKeys(newOpenKeys);
+  }, [location.pathname]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -161,7 +176,8 @@ const AdminLayout = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[getSelectedKey()]}
-          defaultOpenKeys={getOpenKeys()}
+          openKeys={openKeys}
+          onOpenChange={onOpenChange}
           items={[
             {
               key: '1',

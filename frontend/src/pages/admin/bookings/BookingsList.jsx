@@ -247,46 +247,6 @@ const BookingsList = () => {
         },
     ];
 
-    const statusCounts = {
-        pending: bookings.filter(b => b.status === 'pending').length,
-        confirmed: bookings.filter(b => b.status === 'confirmed').length,
-        cancelled: bookings.filter(b => b.status === 'cancelled').length,
-        completed: bookings.filter(b => b.status === 'completed').length,
-        total: bookings.length,
-    };
-
-    const statusCards = [
-        {
-            title: 'Total Bookings',
-            value: statusCounts.total,
-            icon: <CalendarOutlined />,
-            color: '#1890ff',
-        },
-        {
-            title: 'Pending',
-            value: statusCounts.pending,
-            icon: <ClockCircleOutlined />,
-            color: '#faad14',
-        },
-        {
-            title: 'Confirmed',
-            value: statusCounts.confirmed,
-            icon: <CheckCircleOutlined />,
-            color: '#52c41a',
-        },
-        {
-            title: 'Completed',
-            value: statusCounts.completed,
-            icon: <CheckCircleOutlined />,
-            color: '#722ed1',
-        },
-        {
-            title: 'Cancelled',
-            value: statusCounts.cancelled,
-            icon: <CloseCircleOutlined />,
-            color: '#f5222d',
-        },
-    ];
 
     return (
         <div className="bookings-container">
@@ -305,33 +265,6 @@ const BookingsList = () => {
                 </Button>
             </div>
 
-            {/* Status Cards */}
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-                {statusCards.map((card, index) => (
-                    <Col xs={24} sm={12} md={12} lg={4.8} key={index}>
-                        <Card 
-                            bordered={false} 
-                            style={{ 
-                                background: card.color,
-                                color: 'white',
-                                borderRadius: 8,
-                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                            }}
-                            bodyStyle={{ padding: '16px 24px' }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <div style={{ fontSize: 12, opacity: 0.8 }}>{card.title}</div>
-                                    <div style={{ fontSize: 24, fontWeight: 'bold' }}>{card.value}</div>
-                                </div>
-                                <div style={{ fontSize: 32 }}>
-                                    {React.cloneElement(card.icon, { style: { opacity: 0.3 } })}
-                                </div>
-                            </div>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
 
             <Card 
                 title={
