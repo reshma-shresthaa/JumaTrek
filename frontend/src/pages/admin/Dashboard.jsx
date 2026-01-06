@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Statistic, Table, Tag, Progress, Button } from 'antd';
+import { Row, Col, Card, Statistic, Table, Tag, Progress, Button, message } from 'antd';
 import { 
   UserOutlined, 
   BookOutlined, 
@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import { Line, Pie } from '@ant-design/charts';
 import { Link } from 'react-router-dom';
+import { adminService } from '../../services/adminApi';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -26,84 +27,96 @@ const Dashboard = () => {
     conversionRate: 0,
   });
 
+  const [revenueData, setRevenueData] = useState([
+    { month: 'Jan', revenue: 0 },
+    { month: 'Feb', revenue: 0 },
+    { month: 'Mar', revenue: 0 },
+    { month: 'Apr', revenue: 0 },
+    { month: 'May', revenue: 0 },
+    { month: 'Jun', revenue: 0 },
+  ]);
+
+  const [bookingStatusData, setBookingStatusData] = useState([
+    { type: 'Confirmed', value: 0 },
+    { type: 'Pending', value: 0 },
+    { type: 'Cancelled', value: 0 },
+  ]);
+
   const [recentBookings, setRecentBookings] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
 
-  // Mock data - replace with actual API calls
-  useEffect(() => {
-    // Simulate API call
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Mock data
+  // Fetch real data from the backend
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Fetch dashboard stats
+      const statsResponse = await adminService.getDashboardStats();
+      if (statsResponse.success) {
         setStats({
-          totalUsers: 1245,
-          totalTreks: 28,
-          totalBookings: 324,
-          activeGuides: 15,
-          revenue: 45230,
-          conversionRate: 68,
+          totalUsers: statsResponse.data.totalUsers || 0,
+          totalTreks: statsResponse.data.totalListings || 0,
+          totalBookings: statsResponse.data.totalBookings || 0,
+          activeGuides: statsResponse.data.totalAdmins || 0, // Assuming admins are guides for now
+          revenue: 0, // This would come from a different endpoint
+          conversionRate: statsResponse.data.totalBookings > 0 ? 
+            Math.round((statsResponse.data.confirmedBookings / statsResponse.data.totalBookings) * 100) : 0,
         });
 
-        setRecentBookings([
-          {
-            id: 'BK001',
-            trek: 'Everest Base Camp',
-            user: 'John Doe',
-            date: '2025-01-15',
-            status: 'confirmed',
-            amount: 1500,
-          },
-          {
-            id: 'BK002',
-            trek: 'Annapurna Circuit',
-            user: 'Jane Smith',
-            date: '2025-01-14',
-            status: 'pending',
-            amount: 1250,
-          },
-          {
-            id: 'BK003',
-            trek: 'Langtang Valley',
-            user: 'Robert Johnson',
-            date: '2025-01-13',
-            status: 'cancelled',
-            amount: 980,
-          },
-          {
-            id: 'BK004',
-            trek: 'Manaslu Circuit',
-            user: 'Emily Davis',
-            date: '2025-01-12',
-            status: 'confirmed',
-            amount: 1350,
-          },
-          {
-            id: 'BK005',
-            trek: 'Upper Mustang',
-            user: 'Michael Brown',
-            date: '2025-01-11',
-            status: 'completed',
-            amount: 1750,
-          },
+        // Update booking status data for the pie chart
+        setBookingStatusData([
+          { type: 'Confirmed', value: statsResponse.data.confirmedBookings || 0 },
+          { type: 'Pending', value: statsResponse.data.pendingBookings || 0 },
+          { type: 'Cancelled', value: (statsResponse.data.totalBookings - statsResponse.data.confirmedBookings - statsResponse.data.pendingBookings) || 0 },
         ]);
-
-        setRecentUsers([
-          { id: 1, name: 'John Doe', email: 'john@example.com', joinDate: '2025-01-10' },
-          { id: 2, name: 'Jane Smith', email: 'jane@example.com', joinDate: '2025-01-09' },
-          { id: 3, name: 'Robert Johnson', email: 'robert@example.com', joinDate: '2025-01-08' },
-          { id: 4, name: 'Emily Davis', email: 'emily@example.com', joinDate: '2025-01-07' },
-          { id: 5, name: 'Michael Brown', email: 'michael@example.com', joinDate: '2025-01-06' },
-        ]);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchData();
+      // Fetch recent bookings
+      const bookingsResponse = await adminService.getAllBookings({
+        limit: 5,
+        sort: '-createdAt'
+      });
+      
+      if (bookingsResponse.success) {
+        setRecentBookings(bookingsResponse.data.map(booking => ({
+          id: booking._id,
+          trek: booking.trek?.name || 'N/A',
+          user: booking.user?.name || 'Guest User',
+          date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A',
+          status: booking.status || 'pending',
+          amount: booking.totalAmount || 0,
+        })));
+      }
+
+      // Fetch recent users
+      const usersResponse = await adminService.getAllUsers({
+        limit: 5,
+        sort: '-createdAt'
+      });
+      
+      if (usersResponse.success) {
+        setRecentUsers(usersResponse.data.map(user => ({
+          id: user._id,
+          name: user.name || 'User',
+          email: user.email || 'No email',
+          joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      message.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
   }, []);
+
+  // Function to handle refresh
+  const handleRefresh = () => {
+    fetchDashboardData();
+  };
 
   const bookingColumns = [
     {
@@ -169,29 +182,10 @@ const Dashboard = () => {
     },
   ];
 
-  // Chart data
-  const revenueData = [
-    { month: 'Jan', value: 12000 },
-    { month: 'Feb', value: 15000 },
-    { month: 'Mar', value: 18000 },
-    { month: 'Apr', value: 25000 },
-    { month: 'May', value: 32000 },
-    { month: 'Jun', value: 40000 },
-    { month: 'Jul', value: 50000 },
-  ];
-
-  const trekDistributionData = [
-    { type: 'Everest Region', value: 35 },
-    { type: 'Annapurna Region', value: 25 },
-    { type: 'Langtang Region', value: 20 },
-    { type: 'Manaslu Region', value: 15 },
-    { type: 'Other Regions', value: 5 },
-  ];
-
   const configRevenue = {
     data: revenueData,
     xField: 'month',
-    yField: 'value',
+    yField: 'revenue',
     point: {
       size: 5,
       shape: 'diamond',
@@ -203,9 +197,9 @@ const Dashboard = () => {
     },
   };
 
-  const configTrekDistribution = {
+  const configBookingStatus = {
     appendPadding: 10,
-    data: trekDistributionData,
+    data: bookingStatusData,
     angleField: 'value',
     colorField: 'type',
     radius: 0.8,
@@ -213,6 +207,7 @@ const Dashboard = () => {
       type: 'outer',
       content: '{name} {percentage}',
     },
+    color: ['#52c41a', '#faad14', '#ff4d4f'], // green, orange, red
     interactions: [
       {
         type: 'element-active',
@@ -222,13 +217,20 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header" style={{ marginBottom: '24px' }}>
-        <h2>Dashboard</h2>
-        <div>
-          <Button type="primary" icon={<ReloadOutlined />} onClick={() => window.location.reload()}>
-            Refresh
-          </Button>
-        </div>
+      <div className="dashboard-header" style={{ 
+        marginBottom: '24px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h2 style={{ margin: 0 }}>Dashboard</h2>
+        <Button 
+          type="primary" 
+          icon={<ReloadOutlined />} 
+          onClick={handleRefresh}
+        >
+          Refresh
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -246,8 +248,8 @@ const Dashboard = () => {
               }
             />
             <div style={{ marginTop: '8px' }}>
-              <Progress percent={65} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+120 from last month</div>
+              <Progress percent={100} size="small" status="active" showInfo={false} />
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Total registered users</div>
             </div>
           </Card>
         </Col>
@@ -259,8 +261,8 @@ const Dashboard = () => {
               prefix={<BookOutlined />}
             />
             <div style={{ marginTop: '8px' }}>
-              <Progress percent={45} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+5 from last month</div>
+              <Progress percent={100} size="small" status="active" showInfo={false} />
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Total treks available</div>
             </div>
           </Card>
         </Col>
@@ -277,8 +279,8 @@ const Dashboard = () => {
               }
             />
             <div style={{ marginTop: '8px' }}>
-              <Progress percent={78} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+24 from last month</div>
+              <Progress percent={stats.conversionRate || 0} size="small" status="active" showInfo={false} />
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{stats.conversionRate}% booking conversion rate</div>
             </div>
           </Card>
         </Col>
@@ -290,8 +292,8 @@ const Dashboard = () => {
               prefix={<TeamOutlined />}
             />
             <div style={{ marginTop: '8px' }}>
-              <Progress percent={90} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>+3 from last month</div>
+              <Progress percent={100} size="small" status="active" showInfo={false} />
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Active team members</div>
             </div>
           </Card>
         </Col>
@@ -316,9 +318,9 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col xs={24} md={8}>
-          <Card title="Trek Distribution">
+          <Card title="Booking Status">
             <div style={{ height: '300px' }}>
-              <Pie {...configTrekDistribution} />
+              <Pie {...configBookingStatus} />
             </div>
           </Card>
         </Col>
@@ -356,30 +358,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Quick Actions */}
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-        <Col span={24}>
-          <Card title="Quick Actions">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-              <Button type="primary" icon={<BookOutlined />}>
-                Add New Trek
-              </Button>
-              <Button icon={<UserOutlined />}>
-                Add New User
-              </Button>
-              <Button icon={<TeamOutlined />}>
-                Manage Guides
-              </Button>
-              <Button icon={<MessageOutlined />}>
-                View Messages
-              </Button>
-              <Button icon={<DollarOutlined />}>
-                View Revenue Report
-              </Button>
-            </div>
-          </Card>
-        </Col>
-      </Row>
     </div>
   );
 };

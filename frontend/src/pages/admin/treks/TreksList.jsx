@@ -25,6 +25,7 @@ import {
   ReloadOutlined
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
+import { adminService } from '../../../services/adminApi';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -39,7 +40,6 @@ const TreksList = () => {
   });
   const [filters, setFilters] = useState({
     search: '',
-    status: 'all',
     difficulty: 'all',
     region: 'all',
   });
@@ -53,84 +53,42 @@ const TreksList = () => {
   const fetchTreks = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      setTimeout(() => {
-        const mockTreks = [
-          {
-            id: '1',
-            title: 'Everest Base Camp Trek',
-            region: 'Everest',
-            difficulty: 'Challenging',
-            duration: '14 days',
-            price: 1500,
-            status: 'active',
-            featured: true,
-            bookings: 24,
-            rating: 4.8,
-            createdAt: '2025-01-10',
-          },
-          {
-            id: '2',
-            title: 'Annapurna Circuit',
-            region: 'Annapurna',
-            difficulty: 'Moderate',
-            duration: '18 days',
-            price: 1250,
-            status: 'active',
-            featured: true,
-            bookings: 18,
-            rating: 4.9,
-            createdAt: '2025-01-15',
-          },
-          {
-            id: '3',
-            title: 'Langtang Valley Trek',
-            region: 'Langtang',
-            difficulty: 'Easy',
-            duration: '10 days',
-            price: 850,
-            status: 'draft',
-            featured: false,
-            bookings: 8,
-            rating: 4.5,
-            createdAt: '2025-01-20',
-          },
-          // Add more mock data as needed
-        ];
+      const params = {
+        page: pagination.current,
+        limit: pagination.pageSize,
+        region: filters.region !== 'all' ? filters.region : undefined,
+        difficulty: filters.difficulty !== 'all' ? filters.difficulty : undefined,
+        // Add search if needed, but the API might not support it directly
+      };
 
-        // Apply filters
-        let filteredTreks = [...mockTreks];
+      const response = await adminService.getAllListings(params);
+      
+      if (response.success) {
+        // Apply client-side search filter if search is provided
+        let filteredData = response.data;
         
         if (filters.search) {
           const searchLower = filters.search.toLowerCase();
-          filteredTreks = filteredTreks.filter(trek => 
-            trek.title.toLowerCase().includes(searchLower) ||
-            trek.region.toLowerCase().includes(searchLower)
+          filteredData = response.data.filter(listing => 
+            listing.title.toLowerCase().includes(searchLower) ||
+            listing.region.toLowerCase().includes(searchLower) ||
+            listing.description.toLowerCase().includes(searchLower)
           );
         }
-        
-        if (filters.status !== 'all') {
-          filteredTreks = filteredTreks.filter(trek => trek.status === filters.status);
-        }
-        
-        if (filters.difficulty !== 'all') {
-          filteredTreks = filteredTreks.filter(trek => trek.difficulty === filters.difficulty);
-        }
-        
-        if (filters.region !== 'all') {
-          filteredTreks = filteredTreks.filter(trek => trek.region === filters.region);
-        }
 
-        setTreks(filteredTreks);
+        setTreks(filteredData);
         setPagination({
           ...pagination,
-          total: filteredTreks.length,
+          total: filters.search ? filteredData.length : response.total,
+          current: response.page,
         });
-        setLoading(false);
-      }, 500);
+      } else {
+        message.error('Failed to load treks');
+      }
     } catch (error) {
       console.error('Error fetching treks:', error);
       message.error('Failed to load treks');
+    } finally {
       setLoading(false);
     }
   };
@@ -161,17 +119,14 @@ const TreksList = () => {
     });
   };
 
-  const handleDelete = (id) => {
-    // Handle delete logic
-    message.success('Trek deleted successfully');
-    fetchTreks();
-  };
-
-  const handleStatusChange = (id, checked) => {
-    // Handle status change logic
-    const newStatus = checked ? 'active' : 'inactive';
-    message.success(`Trek status updated to ${newStatus}`);
-    fetchTreks();
+  const handleDelete = async (id) => {
+    try {
+      await adminService.deleteListing(id);
+      message.success('Trek deleted successfully');
+      fetchTreks();
+    } catch (error) {
+      message.error('Failed to delete trek');
+    }
   };
 
   const columns = [
@@ -180,14 +135,9 @@ const TreksList = () => {
       dataIndex: 'title',
       key: 'title',
       render: (text, record) => (
-        <>
-          <Link to={`/admin/treks/${record.id}`} className="font-medium">
-            {text}
-          </Link>
-          {record.featured && (
-            <Tag color="gold" style={{ marginLeft: 8 }}>Featured</Tag>
-          )}
-        </>
+        <Link to={`/admin/treks/${record._id}`} className="font-medium">
+          {text}
+        </Link>
       ),
       sorter: (a, b) => a.title.localeCompare(b.title),
     },
@@ -212,6 +162,13 @@ const TreksList = () => {
       sorter: (a, b) => a.difficulty.localeCompare(b.difficulty),
     },
     {
+      title: 'Duration',
+      dataIndex: 'duration',
+      key: 'duration',
+      render: (duration) => `${duration} days`,
+      sorter: (a, b) => a.duration - b.duration,
+    },
+    {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
@@ -219,40 +176,17 @@ const TreksList = () => {
       sorter: (a, b) => a.price - b.price,
     },
     {
-      title: 'Bookings',
-      dataIndex: 'bookings',
-      key: 'bookings',
-      sorter: (a, b) => a.bookings - b.bookings,
+      title: 'Max Altitude',
+      dataIndex: 'maxAltitude',
+      key: 'maxAltitude',
+      render: (altitude) => altitude || 'N/A',
     },
     {
-      title: 'Rating',
-      dataIndex: 'rating',
-      key: 'rating',
-      render: (rating) => (
-        <span className="flex items-center">
-          <span className="text-yellow-500 mr-1">★</span>
-          {rating}
-        </span>
-      ),
-      sorter: (a, b) => a.rating - b.rating,
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status, record) => (
-        <Switch 
-          checked={status === 'active'}
-          onChange={(checked) => handleStatusChange(record.id, checked)}
-          checkedChildren="Active"
-          unCheckedChildren="Inactive"
-        />
-      ),
-      filters: [
-        { text: 'Active', value: 'active' },
-        { text: 'Draft', value: 'draft' },
-      ],
-      onFilter: (value, record) => record.status === value,
+      title: 'Created',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => new Date(date).toLocaleDateString(),
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
     },
     {
       title: 'Actions',
@@ -260,19 +194,19 @@ const TreksList = () => {
       render: (_, record) => (
         <Space size="middle">
           <Tooltip title="View Details">
-            <Link to={`/admin/treks/${record.id}`}>
+            <Link to={`/admin/treks/${record._id}`}>
               <Button type="text" icon={<EyeOutlined />} />
             </Link>
           </Tooltip>
           <Tooltip title="Edit">
-            <Link to={`/admin/treks/edit/${record.id}`}>
+            <Link to={`/admin/treks/edit/${record._id}`}>
               <Button type="text" icon={<EditOutlined />} />
             </Link>
           </Tooltip>
           <Tooltip title="Delete">
             <Popconfirm
               title="Are you sure you want to delete this trek?"
-              onConfirm={() => handleDelete(record.id)}
+              onConfirm={() => handleDelete(record._id)}
               okText="Yes"
               cancelText="No"
             >
@@ -308,19 +242,6 @@ const TreksList = () => {
           </Col>
           <Col xs={24} md={16} className="flex flex-wrap gap-2 justify-end">
             <Select
-              placeholder="Filter by status"
-              className="w-full md:w-40"
-              value={filters.status}
-              onChange={(value) => handleFilterChange('status', value)}
-              suffixIcon={<FilterOutlined />}
-            >
-              <Option value="all">All Status</Option>
-              <Option value="active">Active</Option>
-              <Option value="draft">Draft</Option>
-              <Option value="archived">Archived</Option>
-            </Select>
-            
-            <Select
               placeholder="Filter by difficulty"
               className="w-full md:w-40"
               value={filters.difficulty}
@@ -354,7 +275,6 @@ const TreksList = () => {
               onClick={() => {
                 setFilters({
                   search: '',
-                  status: 'all',
                   difficulty: 'all',
                   region: 'all',
                 });
@@ -376,7 +296,7 @@ const TreksList = () => {
         <Table
           columns={columns}
           dataSource={treks}
-          rowKey="id"
+          rowKey="_id"
           loading={loading}
           pagination={{
             ...pagination,

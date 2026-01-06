@@ -15,6 +15,7 @@ import MediaLibrary from '../pages/admin/media/MediaLibrary';
 import Settings from '../pages/admin/settings/Settings';
 import Login from '../pages/admin/Login';
 import NotFound from '../pages/NotFound';
+import CustomRequestList from '../pages/admin/customRequests/CustomRequestList';
 
 const AdminRoutes = () => {
   return (
@@ -22,7 +23,10 @@ const AdminRoutes = () => {
       <Route path="login" element={<Login />} />
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
-        
+
+        {/* Custom Requests Route */}
+        <Route path="custom-requests" element={<CustomRequestList />} />
+
         {/* Treks Routes */}
         <Route path="treks">
           <Route index element={<TreksList />} />
@@ -30,28 +34,28 @@ const AdminRoutes = () => {
           <Route path=":id" element={<TrekDetail />} />
           <Route path="edit/:id" element={<EditTrek />} />
         </Route>
-        
+
         {/* Users Routes */}
         <Route path="users">
           <Route index element={<UsersList />} />
           <Route path=":id" element={<UserDetail />} />
         </Route>
-        
+
         {/* Bookings Routes */}
         <Route path="bookings">
           <Route index element={<BookingsList />} />
           <Route path=":id" element={<BookingDetail />} />
         </Route>
-        
+
         {/* Guides Routes */}
         <Route path="guides" element={<GuidesList />} />
-        
+
         {/* Media Routes */}
         <Route path="media" element={<MediaLibrary />} />
-        
+
         {/* Settings Route */}
         <Route path="settings" element={<Settings />} />
-        
+
         {/* 404 - Keep this at the end */}
         <Route path="*" element={<NotFound />} />
       </Route>

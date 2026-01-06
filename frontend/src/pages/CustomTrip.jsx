@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Select, InputNumber, Slider, Button, Steps, Form, Input, DatePicker, 
+import {
+  Select, InputNumber, Slider, Button, Steps, Form, Input, DatePicker,
   Card, Row, Col, Typography, Divider, Collapse, Tag, Alert, Checkbox, Radio,
   message, Spin, Result
 } from 'antd';
 import dayjs from 'dayjs';
-import { 
-  UserOutlined, EnvironmentOutlined, TeamOutlined, CalendarOutlined, 
+import {
+  UserOutlined, EnvironmentOutlined, TeamOutlined, CalendarOutlined,
   DollarOutlined, StarOutlined, InfoCircleOutlined, ArrowLeftOutlined,
   ArrowRightOutlined, CheckOutlined, SafetyOutlined, HeartOutlined,
   HomeOutlined, CarOutlined, ForkOutlined, MedicineBoxOutlined,
@@ -135,31 +135,31 @@ const CustomTrip = () => {
     groupSize: 1,
     groupType: 'friends',
     ageRange: { min: 20, max: 50 },
-    
+
     // Experience & Fitness
     difficulty: 'moderate',
     experienceLevel: 'beginner',
     fitnessLevel: 'moderate',
-    
+
     // Accommodation & Meals
     accommodation: 'teahouse',
     mealPreferences: ['vegetarian'],
     dietaryRestrictions: '',
-    
+
     // Services
     guideRequired: true,
     porterRequired: true,
     transportation: ['private_vehicle'],
     insuranceRequired: true,
     equipmentRental: false,
-    
+
     // Budget
     budgetRange: 'standard',
     budgetAmount: 1500, // USD
-    
+
     // Special Requests
     specialRequests: '',
-    
+
     // Contact Information
     contactInfo: {
       name: '',
@@ -173,20 +173,20 @@ const CustomTrip = () => {
         email: ''
       }
     },
-    
+
     // Internal use
     itinerary: [],
     gearRecommendations: [],
     costBreakdown: {},
     safetyNotes: []
   });
-  
+
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [hasPendingTrip, setHasPendingTrip] = useState(false);
   const navigate = useNavigate();
-  
+
   // Reset form to initial state when component mounts
   useEffect(() => {
     // Clear any existing form data
@@ -279,7 +279,7 @@ const CustomTrip = () => {
 
     loadDraft();
   }, [form]);
-  
+
   // Form steps configuration
   const steps = [
     { title: 'Trek Details', icon: <EnvironmentOutlined /> },
@@ -289,13 +289,13 @@ const CustomTrip = () => {
     { title: 'Budget & Dates', icon: <DollarOutlined /> },
     { title: 'Review & Submit', icon: <CheckOutlined /> }
   ];
-  
+
   // Calculate end date based on start date and duration
   const calculateEndDate = (startDate, duration) => {
     if (!startDate) return null;
     return dayjs(startDate).add(duration - 1, 'day');
   };
-  
+
   // Handle form field changes
   const handleInputChange = (name, value) => {
     // Update the form field value
@@ -322,7 +322,7 @@ const CustomTrip = () => {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
-  
+
   // Handle nested object updates
   const handleNestedChange = (parent, name, value) => {
     setFormData(prev => ({
@@ -364,14 +364,14 @@ const CustomTrip = () => {
         ]);
       }
     };
-    
+
     fetchDestinations();
   }, []);
 
   const nextStep = () => {
     // Get current form values
     const formValues = form ? form.getFieldsValue() : {};
-    
+
     // Basic validation before proceeding to next step
     if (currentStep === 0) {
       if (!formValues.destination && !formData.destination) {
@@ -384,7 +384,7 @@ const CustomTrip = () => {
         return;
       }
     }
-    
+
     // Update form data with current values before proceeding
     if (form) {
       const currentValues = form.getFieldsValue(true);
@@ -397,7 +397,7 @@ const CustomTrip = () => {
         }
       }));
     }
-    
+
     // Proceed to next step
     setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -432,7 +432,7 @@ const CustomTrip = () => {
     try {
       // Check authentication status
       const { isAuthenticated } = checkAuth();
-      
+
       if (!isAuthenticated) {
         // Save form data to localStorage before redirecting to login
         const formDataToSave = {
@@ -450,16 +450,16 @@ const CustomTrip = () => {
           isDraft: true,
           timestamp: new Date().toISOString()
         };
-        
+
         localStorage.setItem('pendingCustomTrip', JSON.stringify(formDataToSave));
-        
+
         // Show message and redirect to login
         message.info('Please sign in to submit your custom trip request');
-        navigate('/login', { 
-          state: { 
+        navigate('/login', {
+          state: {
             from: 'custom-trip',
             message: 'Please sign in to complete your custom trip submission'
-          } 
+          }
         });
         return;
       }
@@ -492,9 +492,9 @@ const CustomTrip = () => {
       if (!submissionData.contactInfo?.name || !submissionData.contactInfo?.email) {
         throw new Error('Please provide your contact information');
       }
-      
+
       console.log('Submitting form data:', submissionData);
-      
+
       try {
         // Make the API call with authentication
         const response = await axios.post('/api/custom-trips', submissionData, {
@@ -503,16 +503,16 @@ const CustomTrip = () => {
             'Authorization': `Bearer ${checkAuth().token}`
           }
         });
-        
+
         console.log('Submission successful:', response.data);
-        
+
         // Show success message
         message.success('Your custom trek request has been submitted successfully!');
-        
+
         // Clear form and any pending trip data
         form.resetFields();
         localStorage.removeItem('pendingCustomTrip');
-        
+
         // Show success message with a button to create another trip
         Modal.success({
           title: 'Trip Submitted Successfully!',
@@ -524,16 +524,16 @@ const CustomTrip = () => {
             setCurrentStep(0);
           }
         });
-        
+
         // Redirect to user profile after 5 seconds if user doesn't click the button
         setTimeout(() => {
           navigate('/profile');
         }, 5000);
-        
+
       } catch (apiError) {
         console.error('API Error:', apiError);
         const errorMessage = apiError.response?.data?.message || 'Failed to submit your request. Please try again.';
-        
+
         if (apiError.response?.status === 401) {
           // Token expired or invalid - redirect to login
           message.error('Your session has expired. Please sign in again.');
@@ -542,7 +542,7 @@ const CustomTrip = () => {
           throw new Error(errorMessage);
         }
       }
-      
+
     } catch (error) {
       console.error('Error in form submission:', error);
       message.error(error.message || 'Failed to submit your request. Please try again.');
@@ -551,7 +551,7 @@ const CustomTrip = () => {
       setLoading(false);
     }
   };
-  
+
   // Render the current step component
   const renderStepContent = () => {
     switch (currentStep) {
@@ -672,30 +672,30 @@ const CustomTrip = () => {
         <h1>Customize Your Dream Trek</h1>
         <p>Fill out the form below to create your perfect trekking experience in the Himalayas</p>
       </motion.div>
-      
+
       <div className="custom-trip-steps">
         <Steps current={currentStep} responsive={true}>
           {steps.map((item, index) => (
-            <Step 
-              key={item.title} 
-              title={item.title} 
+            <Step
+              key={item.title}
+              title={item.title}
               icon={item.icon}
               disabled={loading}
             />
           ))}
         </Steps>
       </div>
-      
+
       <div className="custom-trip-form">
         <Spin spinning={loading} tip="Processing...">
-          <Form 
-            layout="vertical" 
+          <Form
+            layout="vertical"
             form={form}
             onFinish={currentStep === steps.length - 1 ? handleSubmit : nextStep}
             initialValues={formData}
           >
             {renderStepContent()}
-            
+
             {currentStep < steps.length - 1 && (
               <div className="form-navigation">
                 {currentStep > 0 && (
@@ -708,9 +708,9 @@ const CustomTrip = () => {
                     Previous
                   </Button>
                 )}
-                
-                <Button 
-                  type="primary" 
+
+                <Button
+                  type="primary"
                   htmlType="submit"
                   icon={<ArrowRightOutlined />}
                   loading={loading}
@@ -722,7 +722,7 @@ const CustomTrip = () => {
           </Form>
         </Spin>
       </div>
-      
+
       <div className="custom-trip-info">
         <div className="info-card">
           <StarOutlined className="info-icon" />
@@ -740,7 +740,7 @@ const CustomTrip = () => {
           <p>We're committed to responsible travel that benefits local communities.</p>
         </div>
       </div>
-      
+
       <div className="custom-trip-support">
         <Alert
           message="Need help?"
