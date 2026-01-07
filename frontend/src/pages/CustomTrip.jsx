@@ -311,7 +311,7 @@ const CustomTrip = () => {
     };
 
     loadDraft();
-    
+
     // Clean up function to clear draft if component unmounts
     return () => {
       const pendingTrip = localStorage.getItem('pendingCustomTrip');
@@ -391,13 +391,19 @@ const CustomTrip = () => {
         const response = await axios.get(`${API_BASE}/api/listing`);
         if (response.data.success) {
           const dbDestinations = response.data.data.map(listing => ({
-            value: listing.title, // Use title as value for backend lookup
+            value: listing._id, // Use ID as value for reliable lookup
             label: listing.title,
+            title: listing.title,
             duration: listing.duration,
+            difficulty: listing.difficulty,
+            maxAltitude: listing.maxAltitude,
+            highlights: listing.highlights,
+            description: listing.description,
+            bestSeason: Array.isArray(listing.bestSeason) ? listing.bestSeason.join(', ') : listing.bestSeason
           }));
 
           // Combine with "Custom Route" option
-          setDestinations([...dbDestinations, { value: 'custom', label: 'Custom Route' }]);
+          setDestinations([...dbDestinations, { value: 'custom', label: 'Custom Route', title: 'Custom Route' }]);
         }
       } catch (error) {
         console.error('Error fetching destinations:', error);
@@ -468,7 +474,7 @@ const CustomTrip = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (submitData) => {
     try {
       // Check if user is logged in
       const token = localStorage.getItem('token');
@@ -482,40 +488,45 @@ const CustomTrip = () => {
           lastSaved: new Date().toISOString()
         };
         localStorage.setItem('pendingCustomTrip', JSON.stringify(pendingTrip));
-        
+
         // Redirect to login with redirect URL
         message.info('Please login to submit your custom trip');
         navigate('/auth?redirect=/custom-trip');
         return;
       }
-      
+
       setLoading(true);
-      
+
       try {
-        // Get form values
-        const values = await form.validateFields();
-        const tripData = { ...formData, ...values };
-        
+        // Get form values (use submitted data if available from ReviewSubmitStep)
+        let tripData;
+        if (submitData && typeof submitData === 'object' && !submitData.nativeEvent) {
+          tripData = submitData;
+        } else {
+          const values = await form.validateFields();
+          tripData = { ...formData, ...values };
+        }
+
         // Save to database
-        await axios.post('/api/trips/custom', tripData, {
+        await axios.post(`${API_BASE}/api/custom-trips/`, tripData, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         // Clear any pending trip data
         localStorage.removeItem('pendingCustomTrip');
-        
+
         // Mark as submitted and show success message
         setFormSubmitted(true);
         message.success('Your custom trip has been submitted successfully!');
-        
+
         // Redirect to profile page after a short delay
         setTimeout(() => {
           navigate('/profile');
         }, 3000);
-        
+
       } catch (apiError) {
         console.error('API Error:', apiError);
         const errorMessage = apiError.response?.data?.message || 'Failed to submit your request. Please try again.';

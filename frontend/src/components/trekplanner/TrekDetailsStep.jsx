@@ -1,15 +1,15 @@
 import React from 'react';
-import { 
-  Row, 
-  Col, 
-  Form, 
-  Input, 
+import {
+  Row,
+  Col,
+  Form,
+  Input,
   InputNumber,
-  Select, 
-  DatePicker, 
-  Card, 
-  Typography, 
-  Slider, 
+  Select,
+  DatePicker,
+  Card,
+  Typography,
+  Slider,
   Divider,
   Tag,
   Tooltip
@@ -53,52 +53,22 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
   };
 
   const getTrekInfo = (destination) => {
-    const treks = {
-      'everest_base_camp': {
-        title: 'Everest Base Camp Trek',
-        description: 'The classic trek to the base of the world\'s highest mountain. Experience Sherpa culture, stunning Himalayan views, and the famous Namche Bazaar.',
-        duration: '12-14 days',
-        altitude: '5,545m',
-        difficulty: 'Challenging',
-        bestSeason: 'Mar-May, Sep-Nov',
-        highlights: [
-          'Spectacular views of Mount Everest',
-          'Explore Sherpa culture in Namche Bazaar',
-          'Visit Tengboche Monastery',
-          'Kala Patthar sunrise view'
-        ]
-      },
-      'annapurna_circuit': {
-        title: 'Annapurna Circuit Trek',
-        description: 'One of the most diverse treks in the world, offering a variety of landscapes from subtropical forests to high-altitude deserts.',
-        duration: '15-20 days',
-        altitude: '5,416m',
-        difficulty: 'Moderate to Challenging',
-        bestSeason: 'Mar-May, Sep-Nov',
-        highlights: [
-          'Cross the Thorong La Pass',
-          'Natural hot springs at Tatopani',
-          'Poon Hill sunrise',
-          'Diverse landscapes and cultures'
-        ]
-      },
-      'langtang_valley': {
-        title: 'Langtang Valley Trek',
-        description: 'A beautiful trek through the Langtang Valley, known as the "Valley of Glaciers", with stunning mountain views and rich Tamang culture.',
-        duration: '10-12 days',
-        altitude: '4,984m',
-        difficulty: 'Moderate',
-        bestSeason: 'Mar-May, Sep-Nov',
-        highlights: [
-          'Less crowded than other treks',
-          'Rich Tamang culture',
-          'Kyanjin Gompa and cheese factory',
-          'Langtang National Park wildlife'
-        ]
-      }
-    };
-    
-    return treks[destination] || {
+    // Check if the destination is in our fetched destinations list
+    const foundTrek = destinations.find(d => d.value === destination);
+
+    if (foundTrek && destination !== 'custom') {
+      return {
+        title: foundTrek.title,
+        description: foundTrek.description,
+        duration: `${foundTrek.duration} days`,
+        altitude: foundTrek.maxAltitude || 'N/A',
+        difficulty: foundTrek.difficulty,
+        bestSeason: foundTrek.bestSeason,
+        highlights: foundTrek.highlights || []
+      };
+    }
+
+    return {
       title: 'Custom Trek',
       description: 'We\'ll work with you to create a personalized trekking experience based on your preferences.',
       duration: 'Custom',
@@ -164,17 +134,17 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                   optionFilterProp="label"
                   size="large"
                 >
-                  {popularTreks.map(trek => (
-                    <Option key={trek.value} value={trek.value}>
+                  {destinations.map(trek => (
+                    <Option key={trek.value} value={trek.value} label={trek.label}>
                       <div className="option-content">
                         <div className="option-title">{trek.label}</div>
-                        <div className="option-description">{trek.description}</div>
+                        {trek.duration && <div className="option-description">{trek.duration} days • {trek.difficulty}</div>}
                       </div>
                     </Option>
                   ))}
                 </Select>
               </Form.Item>
-              
+
               {isCustomTrek && (
                 <Form.Item
                   label={
@@ -187,13 +157,13 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                   }
                   name="customDestination"
                   rules={[
-                    { 
-                      required: isCustomTrek, 
-                      message: 'Please specify your custom destination' 
+                    {
+                      required: isCustomTrek,
+                      message: 'Please specify your custom destination'
                     }
                   ]}
                 >
-                  <Input 
+                  <Input
                     placeholder="Enter your custom trek destination"
                     onChange={(e) => onInputChange('customDestination', e.target.value)}
                     value={formData.customDestination}
@@ -201,7 +171,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                   />
                 </Form.Item>
               )}
-              
+
               <div className="date-duration-section">
                 <Row gutter={16}>
                   <Col span={12}>
@@ -217,7 +187,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                       name="startDate"
                       rules={[{ required: true, message: 'Please select a start date' }]}
                     >
-                      <DatePicker 
+                      <DatePicker
                         className="w-full"
                         onChange={handleDateChange}
                         disabledDate={(current) => current && current < dayjs().startOf('day')}
@@ -239,7 +209,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                       name="duration"
                       rules={[{ required: true, message: 'Please select trek duration' }]}
                     >
-                      <InputNumber 
+                      <InputNumber
                         min={1}
                         max={30}
                         className="w-full"
@@ -251,7 +221,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                     </Form.Item>
                   </Col>
                 </Row>
-                
+
                 {formData.startDate && formData.duration > 0 && (
                   <div className="date-summary">
                     <div className="date-summary-content">
@@ -272,7 +242,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                   </div>
                 )}
               </div>
-              
+
               <div className="duration-slider">
                 <div className="flex justify-between mb-2">
                   <span className="text-sm text-gray-600">Trek Duration: {formData.duration} days</span>
@@ -298,7 +268,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
 
         <Col xs={24} md={12}>
           <div className="sticky top-6 space-y-6">
-            <Card 
+            <Card
               className="trek-preview-card"
               title={
                 <div className="flex items-center">
@@ -320,8 +290,8 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                   <>
                     <div className="trek-header">
                       <h3 className="trek-title">
-                        {isCustomTrek && formData.customDestination 
-                          ? formData.customDestination 
+                        {isCustomTrek && formData.customDestination
+                          ? formData.customDestination
                           : currentTrek.title}
                       </h3>
                       {!isCustomTrek && (
@@ -330,13 +300,13 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                         </Tag>
                       )}
                     </div>
-                    
+
                     <p className="trek-description">
-                      {isCustomTrek 
+                      {isCustomTrek
                         ? 'We\'ll work with you to create a personalized trekking experience based on your preferences. Our experts will contact you to discuss the details and create a custom itinerary.'
                         : currentTrek.description}
                     </p>
-                    
+
                     <div className="trek-stats">
                       <div className="stat-item">
                         <div className="stat-icon">
@@ -349,7 +319,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="stat-item">
                         <div className="stat-icon">
                           <EnvironmentOutlined />
@@ -361,7 +331,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="stat-item">
                         <div className="stat-icon">
                           <FireOutlined />
@@ -373,7 +343,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="stat-item">
                         <div className="stat-icon">
                           <GlobalOutlined />
@@ -386,9 +356,9 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                         </div>
                       </div>
                     </div>
-                    
+
                     <Divider className="preview-divider" />
-                    
+
                     <div className="trek-highlights">
                       <h4 className="highlights-title">Trek Highlights</h4>
                       <ul className="highlights-list">
@@ -400,7 +370,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                         ))}
                       </ul>
                     </div>
-                    
+
                     {isCustomTrek && (
                       <div className="custom-trek-note">
                         <InfoCircleOutlined className="mr-2" />
@@ -411,7 +381,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                 )}
               </div>
             </Card>
-            
+
             <Card className="trek-tips-card">
               <div className="flex items-start">
                 <div className="tips-icon">
@@ -420,8 +390,8 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                 <div>
                   <h4 className="tips-title">Planning Your Trek</h4>
                   <p className="tips-content">
-                    Need help choosing the perfect trek? Our experts are here to help you select the best 
-                    route based on your fitness level, experience, and interests. 
+                    Need help choosing the perfect trek? Our experts are here to help you select the best
+                    route based on your fitness level, experience, and interests.
                     <a href="#" className="text-blue-500 hover:underline ml-1">Contact us</a> for personalized advice.
                   </p>
                 </div>
@@ -430,7 +400,7 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
           </div>
         </Col>
       </Row>
-      
+
       <style jsx>{`
         .trek-details-step {
           padding: 0 8px;

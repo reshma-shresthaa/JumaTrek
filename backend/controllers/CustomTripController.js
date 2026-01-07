@@ -21,6 +21,9 @@ export const createCustomTrip = async (req, res) => {
             req.userId ||
             extractUserIdFromHeader(req.headers.authorization);
 
+        console.log("Creating custom trip for user:", userId);
+        console.log("Trip data:", req.body);
+
         if (!userId) {
             return res.status(401).json({
                 success: false,

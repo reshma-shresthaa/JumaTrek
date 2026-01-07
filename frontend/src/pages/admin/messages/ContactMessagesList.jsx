@@ -88,7 +88,7 @@ const ContactMessagesList = () => {
         if (!selectedMessage?._id) return;
         try {
             await adminService.replyToInquiry(selectedMessage._id, values.replyMessage);
-            message.success('Reply saved (email sending disabled)');
+            message.success('Reply sent successfully via email');
             setDetailModalVisible(false);
             replyForm.resetFields();
             fetchMessages();
@@ -272,6 +272,16 @@ const ContactMessagesList = () => {
                             <div style={{ marginBottom: 16, padding: 16, background: '#fff7e6', borderRadius: 4 }}>
                                 <h4>Internal Notes:</h4>
                                 <p>{selectedMessage.notes}</p>
+                            </div>
+                        )}
+
+                        {selectedMessage.status === 'replied' && selectedMessage.lastReply && (
+                            <div style={{ marginBottom: 16, padding: 16, background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 4 }}>
+                                <h4 style={{ color: '#389e0d' }}><MailOutlined /> Previous Reply:</h4>
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedMessage.lastReply.text}</p>
+                                <div style={{ fontSize: '12px', color: '#8c8c8c', marginTop: 8 }}>
+                                    Sent by {selectedMessage.lastReply.adminName || 'Admin'} on {new Date(selectedMessage.lastReply.sentAt).toLocaleString()}
+                                </div>
                             </div>
                         )}
 

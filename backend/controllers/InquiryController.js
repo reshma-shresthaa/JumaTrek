@@ -182,11 +182,25 @@ export const replyToInquiry = async (req, res) => {
             });
         }
 
-        const emailSubject = `Re: ${inquiry.subject}`;
+        const emailSubject = `Reply to your inquiry: ${inquiry.subject}`;
         const emailBody = `
-            <p>Hi ${inquiry.name},</p>
-            <p>${replyMessage}</p>
-            <p>Best regards,<br/>${process.env.APP_NAME || "JumaTrek"} Support</p>
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="background-color: #4f46e5; color: white; padding: 10px; text-align: center; border-radius: 5px 5px 0 0;">
+                    <h2 style="margin: 0;">JumaTrek Support</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p>Dear ${inquiry.name},</p>
+                    <p>Thank you for contacting JumaTrek. We have a reply to your inquiry regarding "<strong>${inquiry.subject}</strong>":</p>
+                    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4f46e5;">
+                        <p style="margin: 0; white-space: pre-wrap;">${replyMessage}</p>
+                    </div>
+                    <p>If you have any further questions, feel free to reply to this email.</p>
+                    <p>Best regards,<br/><strong>The JumaTrek Team</strong></p>
+                </div>
+                <div style="text-align: center; font-size: 12px; color: #777; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+                    <p>&copy; ${new Date().getFullYear()} JumaTrek. All rights reserved.</p>
+                </div>
+            </div>
         `;
 
         await sendEmail(inquiry.email, emailSubject, emailBody);
