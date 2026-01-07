@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Input, Select, Card, message, Popconfirm, Switch } from 'antd';
 import { FileTextOutlined, PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { blogsStorage } from '../../../utils/localStorage';
+import { adminService } from '../../../services/adminApi';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -26,14 +26,15 @@ const BlogsList = () => {
         applyFilters();
     }, [filters, blogs]);
 
-    const fetchBlogs = () => {
+    const fetchBlogs = async () => {
         setLoading(true);
         try {
-            const data = blogsStorage.getAll();
+            const res = await adminService.getBlogs();
+            const data = res.data || [];
             setBlogs(data);
             setFilteredBlogs(data);
         } catch (error) {
-            message.error('Failed to fetch blogs');
+            message.error(error || 'Failed to fetch blogs');
         } finally {
             setLoading(false);
         }
@@ -63,32 +64,28 @@ const BlogsList = () => {
         setFilteredBlogs(filtered);
     };
 
-    const handleDelete = (id, title) => {
+    const handleDelete = async (id, title) => {
         try {
-            blogsStorage.delete(id);
+            await adminService.deleteBlog(id);
             message.success(`Blog "${title}" deleted successfully`);
             fetchBlogs();
         } catch (error) {
-            message.error('Failed to delete blog');
+            message.error(error || 'Failed to delete blog');
         }
     };
 
-    const handleStatusToggle = (id, currentStatus) => {
+    const handleStatusToggle = async (id, currentStatus) => {
         try {
             const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-            const updateData = { status: newStatus };
-            if (newStatus === 'published' && !blogsStorage.getById(id).publishedAt) {
-                updateData.publishedAt = new Date().toISOString();
-            }
-            blogsStorage.update(id, updateData);
+            await adminService.updateBlog(id, { status: newStatus });
             message.success(`Blog status updated to ${newStatus}`);
             fetchBlogs();
         } catch (error) {
-            message.error('Failed to update blog status');
+            message.error(error || 'Failed to update blog status');
         }
     };
 
-    const categories = [...new Set(blogs.map(b => b.category))];
+    const categories = [...new Set(blogs.map(b => b.category).filter(Boolean))];
 
     const columns = [
         {
@@ -116,7 +113,7 @@ const BlogsList = () => {
             render: (status, record) => (
                 <Switch
                     checked={status === 'published'}
-                    onChange={() => handleStatusToggle(record.id, status)}
+                    onChange={() => handleStatusToggle(record._id, status)}
                     checkedChildren="Published"
                     unCheckedChildren="Draft"
                 />
@@ -143,14 +140,14 @@ const BlogsList = () => {
                     <Button
                         type="link"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/blogs/edit/${record.id}`)}
+                        onClick={() => navigate(`/admin/blogs/edit/${record._id}`)}
                     >
                         Edit
                     </Button>
                     <Popconfirm
                         title="Delete Blog"
                         description={`Are you sure you want to delete "${record.title}"?`}
-                        onConfirm={() => handleDelete(record.id, record.title)}
+                        onConfirm={() => handleDelete(record._id, record.title)}
                         okText="Yes"
                         cancelText="No"
                     >
@@ -215,7 +212,7 @@ const BlogsList = () => {
                 <Table
                     columns={columns}
                     dataSource={filteredBlogs}
-                    rowKey="id"
+                    rowKey="_id"
                     loading={loading}
                     pagination={{
                         pageSize: 10,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Tag, Input, Card, message, Popconfirm, Switch, Avatar } from 'antd';
 import { TeamOutlined, PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { guidesStorage } from '../../../utils/localStorage';
+import { adminService } from '../../../services/adminApi';
 
 const { Search } = Input;
 
@@ -21,14 +21,15 @@ const GuidesList = () => {
         applyFilters();
     }, [searchText, guides]);
 
-    const fetchGuides = () => {
+    const fetchGuides = async () => {
         setLoading(true);
         try {
-            const data = guidesStorage.getAll();
+            const res = await adminService.getGuides();
+            const data = res.data || [];
             setGuides(data);
             setFilteredGuides(data);
         } catch (error) {
-            message.error('Failed to fetch guides');
+            message.error(error || 'Failed to fetch guides');
         } finally {
             setLoading(false);
         }
@@ -50,24 +51,24 @@ const GuidesList = () => {
         setFilteredGuides(filtered);
     };
 
-    const handleDelete = (id, name) => {
+    const handleDelete = async (id, name) => {
         try {
-            guidesStorage.delete(id);
+            await adminService.deleteGuide(id);
             message.success(`Guide "${name}" deleted successfully`);
             fetchGuides();
         } catch (error) {
-            message.error('Failed to delete guide');
+            message.error(error || 'Failed to delete guide');
         }
     };
 
-    const handleStatusToggle = (id, currentStatus) => {
+    const handleStatusToggle = async (id, currentStatus) => {
         try {
             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            guidesStorage.update(id, { status: newStatus });
+            await adminService.updateGuide(id, { status: newStatus });
             message.success(`Guide status updated to ${newStatus}`);
             fetchGuides();
         } catch (error) {
-            message.error('Failed to update guide status');
+            message.error(error || 'Failed to update guide status');
         }
     };
 
@@ -133,7 +134,7 @@ const GuidesList = () => {
             render: (status, record) => (
                 <Switch
                     checked={status === 'active'}
-                    onChange={() => handleStatusToggle(record.id, status)}
+                    onChange={() => handleStatusToggle(record._id, status)}
                     checkedChildren="Active"
                     unCheckedChildren="Inactive"
                 />
@@ -147,14 +148,14 @@ const GuidesList = () => {
                     <Button
                         type="link"
                         icon={<EditOutlined />}
-                        onClick={() => navigate(`/admin/guides/edit/${record.id}`)}
+                    onClick={() => navigate(`/admin/guides/edit/${record._id}`)}
                     >
                         Edit
                     </Button>
                     <Popconfirm
                         title="Delete Guide"
                         description={`Are you sure you want to delete "${record.name}"?`}
-                        onConfirm={() => handleDelete(record.id, record.name)}
+                        onConfirm={() => handleDelete(record._id, record.name)}
                         okText="Yes"
                         cancelText="No"
                     >
@@ -198,7 +199,7 @@ const GuidesList = () => {
                 <Table
                     columns={columns}
                     dataSource={filteredGuides}
-                    rowKey="id"
+                    rowKey="_id"
                     loading={loading}
                     pagination={{
                         pageSize: 10,

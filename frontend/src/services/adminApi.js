@@ -174,6 +174,117 @@ export const adminService = {
         }
     },
 
+    // Guides
+    async getGuides(params = {}) {
+        try {
+            const response = await adminApi.get('/guides', { params });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch guides';
+        }
+    },
+
+    async createGuide(guideData) {
+        try {
+            let config = {};
+            let payload = guideData;
+
+            if (guideData instanceof FormData) {
+                config.headers = { 'Content-Type': 'multipart/form-data' };
+            }
+
+            const response = await adminApi.post('/guides', payload, config);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to create guide';
+        }
+    },
+
+    async updateGuide(id, guideData) {
+        try {
+            let config = {};
+            let payload = guideData;
+
+            if (guideData instanceof FormData) {
+                config.headers = { 'Content-Type': 'multipart/form-data' };
+            }
+
+            const response = await adminApi.put(`/guides/${id}`, payload, config);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to update guide';
+        }
+    },
+
+    async deleteGuide(id) {
+        try {
+            const response = await adminApi.delete(`/guides/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to delete guide';
+        }
+    },
+
+    // Blogs
+    async getBlogs(params = {}) {
+        try {
+            const response = await adminApi.get('/blogs', { params });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch blogs';
+        }
+    },
+
+    async getBlogById(id) {
+        try {
+            const response = await adminApi.get(`/blogs/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to fetch blog';
+        }
+    },
+
+    async createBlog(blogData) {
+        try {
+            let config = {};
+            let payload = blogData;
+
+            if (blogData instanceof FormData) {
+                config.headers = { 'Content-Type': 'multipart/form-data' };
+            }
+
+            const response = await adminApi.post('/blogs', payload, config);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to create blog';
+        }
+    },
+
+    async updateBlog(id, blogData) {
+        try {
+            let config = {};
+            let payload = blogData;
+
+            if (blogData instanceof FormData) {
+                config.headers = { 'Content-Type': 'multipart/form-data' };
+            }
+
+            const response = await adminApi.put(`/blogs/${id}`, payload, config);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to update blog';
+        }
+    },
+
+    async deleteBlog(id) {
+        try {
+            const response = await adminApi.delete(`/blogs/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Failed to delete blog';
+        }
+    },
+
     // Custom Trip Requests
     async getCustomTrips(params = {}) {
         try {

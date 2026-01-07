@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, message, Select } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, message, Select, Upload } from 'antd';
+import { SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { blogsStorage } from '../../../utils/localStorage';
+import { adminService } from '../../../services/adminApi';
 import RichTextEditor from '../../../components/common/RichTextEditor';
 
 const { TextArea } = Input;
@@ -12,39 +12,85 @@ const EditBlog = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [content, setContent] = useState('');
+    const [fileList, setFileList] = useState([]);
+    const [existingImage, setExistingImage] = useState(null);
     const navigate = useNavigate();
     const { id } = useParams();
 
     useEffect(() => {
-        const blog = blogsStorage.getById(id);
-        if (blog) {
-            form.setFieldsValue(blog);
-            setContent(blog.content || '');
-        } else {
-            message.error('Blog not found');
-            navigate('/admin/blogs');
-        }
+        const fetchBlog = async () => {
+            try {
+                const res = await adminService.getBlogById(id);
+                if (res?.success && res.data) {
+                    const blog = res.data;
+                    form.setFieldsValue({
+                        title: blog.title,
+                        excerpt: blog.excerpt,
+                        category: blog.category,
+                        tags: blog.tags || [],
+                        status: blog.status || 'draft',
+                    });
+                    setContent(blog.content || '');
+                    if (blog.featuredImage) {
+                        setExistingImage(blog.featuredImage);
+                        setFileList([
+                            {
+                                uid: '-1',
+                                name: 'featured-image',
+                                status: 'done',
+                                url: blog.featuredImage,
+                            },
+                        ]);
+                    }
+                } else {
+                    message.error('Blog not found');
+                    navigate('/admin/blogs');
+                }
+            } catch (error) {
+                message.error(error || 'Failed to load blog');
+                navigate('/admin/blogs');
+            }
+        };
+
+        fetchBlog();
     }, [id, form, navigate]);
+
+    const handleUploadChange = ({ fileList: newFileList }) => {
+        setFileList(newFileList.slice(-1));
+    };
 
     const handleSubmit = async (values) => {
         setLoading(true);
         try {
-            const updateData = {
-                ...values,
-                content,
-            };
+            let payload;
 
-            // If publishing for the first time, set publishedAt
-            const currentBlog = blogsStorage.getById(id);
-            if (values.status === 'published' && currentBlog.status === 'draft') {
-                updateData.publishedAt = new Date().toISOString();
+            // If a new file is chosen, send multipart/form-data
+            const hasNewFile =
+                fileList.length &&
+                fileList[0].originFileObj;
+
+            if (hasNewFile) {
+                const formData = new FormData();
+                formData.append('title', values.title);
+                formData.append('excerpt', values.excerpt);
+                formData.append('category', values.category);
+                (values.tags || []).forEach(tag => formData.append('tags', tag));
+                formData.append('status', values.status || 'draft');
+                formData.append('content', content);
+                formData.append('featuredImage', fileList[0].originFileObj);
+                payload = formData;
+            } else {
+                payload = {
+                    ...values,
+                    content,
+                };
             }
 
-            blogsStorage.update(id, updateData);
+            await adminService.updateBlog(id, payload);
             message.success('Blog updated successfully');
             navigate('/admin/blogs');
         } catch (error) {
-            message.error('Failed to update blog');
+            message.error(error || 'Failed to update blog');
         } finally {
             setLoading(false);
         }
@@ -87,11 +133,26 @@ const EditBlog = () => {
                     </Form.Item>
 
                     <Form.Item
-                        name="featuredImage"
-                        label="Featured Image URL"
-                        rules={[{ required: true, message: 'Please enter featured image URL' }]}
+                        label="Featured Image"
+                        required
                     >
-                        <Input placeholder="https://example.com/image.jpg" />
+                        <Upload
+                            listType="picture-card"
+                            fileList={fileList}
+                            beforeUpload={() => false}
+                            onChange={handleUploadChange}
+                            accept="image/*"
+                        >
+                            {fileList.length >= 1 ? null : (
+                                <div>
+                                    <UploadOutlined />
+                                    <div style={{ marginTop: 8 }}>Select Image</div>
+                                </div>
+                            )}
+                        </Upload>
+                        <div style={{ fontSize: 12, color: '#888' }}>
+                            Choose a featured image from your computer. Leave as-is to keep the current image.
+                        </div>
                     </Form.Item>
 
                     <Form.Item

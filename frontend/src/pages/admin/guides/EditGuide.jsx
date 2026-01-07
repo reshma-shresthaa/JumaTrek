@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Card, message, Select, InputNumber } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { guidesStorage } from '../../../utils/localStorage';
+import { adminService } from '../../../services/adminApi';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -14,23 +14,34 @@ const EditGuide = () => {
     const { id } = useParams();
 
     useEffect(() => {
-        const guide = guidesStorage.getById(id);
-        if (guide) {
-            form.setFieldsValue(guide);
-        } else {
-            message.error('Guide not found');
-            navigate('/admin/guides');
-        }
+        const fetchGuide = async () => {
+            try {
+                const res = await adminService.getGuides();
+                const guides = res.data || [];
+                const guide = guides.find(g => g._id === id);
+                if (guide) {
+                    form.setFieldsValue(guide);
+                } else {
+                    message.error('Guide not found');
+                    navigate('/admin/guides');
+                }
+            } catch (error) {
+                message.error(error || 'Failed to load guide');
+                navigate('/admin/guides');
+            }
+        };
+
+        fetchGuide();
     }, [id, form, navigate]);
 
     const handleSubmit = async (values) => {
         setLoading(true);
         try {
-            guidesStorage.update(id, values);
+            await adminService.updateGuide(id, values);
             message.success('Guide updated successfully');
             navigate('/admin/guides');
         } catch (error) {
-            message.error('Failed to update guide');
+            message.error(error || 'Failed to update guide');
         } finally {
             setLoading(false);
         }

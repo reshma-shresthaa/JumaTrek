@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, message, Select, InputNumber, Avatar, Upload } from 'antd';
-import { PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, message, Select, InputNumber, Upload, Avatar } from 'antd';
+import { UploadOutlined, SaveOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { guidesStorage } from '../../../utils/localStorage';
+import { adminService } from '../../../services/adminApi';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -10,22 +10,43 @@ const { Option } = Select;
 const AddGuide = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [fileList, setFileList] = useState([]);
     const navigate = useNavigate();
+
+    const handleUploadChange = ({ fileList: newFileList }) => {
+        setFileList(newFileList.slice(-1)); // keep only latest file
+    };
 
     const handleSubmit = async (values) => {
         setLoading(true);
         try {
-            const guideData = {
-                ...values,
-                rating: 0,
-                totalTrips: 0,
-                status: 'active',
-            };
-            guidesStorage.create(guideData);
-            message.success('Guide added successfully');
+            if (!fileList.length || !fileList[0].originFileObj) {
+                message.error('Please choose a photo from your computer');
+                setLoading(false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('name', values.name);
+            formData.append('experience', values.experience);
+            values.specialization?.forEach(spec => formData.append('specialization', spec));
+            values.languages?.forEach(lang => formData.append('languages', lang));
+            values.certifications?.forEach(cert => formData.append('certifications', cert));
+            formData.append('bio', values.bio || '');
+            formData.append('rating', 0);
+            formData.append('totalTrips', 0);
+            formData.append('status', 'active');
+            formData.append('photo', fileList[0].originFileObj);
+
+            const res = await adminService.createGuide(formData);
+            if (res?.success) {
+                message.success('Guide added successfully');
+            } else {
+                message.success('Guide added');
+            }
             navigate('/admin/guides');
         } catch (error) {
-            message.error('Failed to add guide');
+            message.error(error || 'Failed to add guide');
         } finally {
             setLoading(false);
         }
@@ -55,11 +76,26 @@ const AddGuide = () => {
                     </Form.Item>
 
                     <Form.Item
-                        name="photo"
-                        label="Photo URL"
-                        rules={[{ required: true, message: 'Please enter photo URL' }]}
+                        label="Guide Photo"
+                        required
                     >
-                        <Input placeholder="https://example.com/photo.jpg" />
+                        <Upload
+                            listType="picture-card"
+                            fileList={fileList}
+                            beforeUpload={() => false}
+                            onChange={handleUploadChange}
+                            accept="image/*"
+                        >
+                            {fileList.length >= 1 ? null : (
+                                <div>
+                                    <UploadOutlined />
+                                    <div style={{ marginTop: 8 }}>Select Photo</div>
+                                </div>
+                            )}
+                        </Upload>
+                        <div style={{ fontSize: 12, color: '#888' }}>
+                            Choose a guide photo from your computer. Only one image will be uploaded.
+                        </div>
                     </Form.Item>
 
                     <Form.Item
