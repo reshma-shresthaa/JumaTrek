@@ -1,5 +1,6 @@
 import CustomTrip from "../model/CustomTripModel.js";
 import User from "../model/UserModel.js";
+import Listing from "../model/ListingModel.js";
 import jwt from "jsonwebtoken";
 
 // Helper to get userId from auth header when cookie is missing
@@ -195,6 +196,73 @@ export const updateCustomTripStatusAdmin = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to update custom trip request",
+            error: error.message,
+        });
+    }
+};
+
+export const getTrekInfoByDestination = async (req, res) => {
+    try {
+        const { destination } = req.params;
+
+        // Map destination values to trek titles (for legacy/static support)
+        const destinationMap = {
+            'everest_base_camp': 'Everest Base Camp',
+            'annapurna_circuit': 'Annapurna Circuit',
+            'langtang_valley': 'Langtang Valley',
+            'manaslu_circuit': 'Manaslu Circuit',
+            'upper_mustang': 'Upper Mustang',
+            'annapurna_base_camp': 'Annapurna Base Camp',
+            'ghorepani_poonhill': 'Ghorepani Poon Hill',
+            'kanchenjunga': 'Kanchenjunga Base Camp',
+            'makalu_base_camp': 'Makalu Base Camp',
+            'rolwaling_valley': 'Rolwaling Valley'
+        };
+
+        // Try to get title from map, otherwise use the destination parameter as the title directly
+        const trekTitle = destinationMap[destination] || destination;
+
+        if (!trekTitle) {
+            return res.status(404).json({
+                success: false,
+                message: "Trek destination not found",
+            });
+        }
+
+        // Find the trek in the Listing collection (using case-insensitive regex for flexibility)
+        const trek = await Listing.findOne({
+            title: { $regex: new RegExp(`^${trekTitle.replace(/[-_]/g, ' ')}$`, 'i') }
+        }) || await Listing.findOne({ title: trekTitle });
+
+        if (!trek) {
+            return res.status(404).json({
+                success: false,
+                message: "Trek information not available in our database",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                title: trek.title,
+                description: trek.description,
+                duration: trek.duration,
+                difficulty: trek.difficulty,
+                maxAltitude: trek.maxAltitude,
+                bestSeason: trek.bestSeason,
+                groupSize: trek.groupSize,
+                highlights: trek.highlights,
+                itinerary: trek.itinerary,
+                gallery: trek.gallery,
+                includes: trek.includes,
+                excludes: trek.excludes
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching trek info:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch trek information",
             error: error.message,
         });
     }

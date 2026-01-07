@@ -10,14 +10,19 @@ const { Option } = Select;
 const EditGuide = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [listingOptions, setListingOptions] = useState([]);
     const navigate = useNavigate();
     const { id } = useParams();
 
     useEffect(() => {
-        const fetchGuide = async () => {
+        const fetchGuideAndListings = async () => {
             try {
-                const res = await adminService.getGuides();
-                const guides = res.data || [];
+                const [guideRes, listingsRes] = await Promise.all([
+                    adminService.getGuides(),
+                    adminService.getAllListings({ limit: 100 }),
+                ]);
+
+                const guides = guideRes.data || [];
                 const guide = guides.find(g => g._id === id);
                 if (guide) {
                     form.setFieldsValue(guide);
@@ -25,13 +30,20 @@ const EditGuide = () => {
                     message.error('Guide not found');
                     navigate('/admin/guides');
                 }
+
+                const options = (listingsRes.data || listingsRes.listings || listingsRes?.data?.data || listingsRes?.data?.listings || [])
+                    .map((item) => ({
+                        label: item.title,
+                        value: item._id,
+                    }));
+                setListingOptions(options);
             } catch (error) {
                 message.error(error || 'Failed to load guide');
                 navigate('/admin/guides');
             }
         };
 
-        fetchGuide();
+        fetchGuideAndListings();
     }, [id, form, navigate]);
 
     const handleSubmit = async (values) => {
@@ -62,6 +74,19 @@ const EditGuide = () => {
                         rules={[{ required: true, message: 'Please enter guide name' }]}
                     >
                         <Input placeholder="Enter guide's full name" />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="listing"
+                        label="Linked Listing (optional)"
+                    >
+                        <Select
+                            showSearch
+                            allowClear
+                            placeholder="Select a listing to link this guide"
+                            options={listingOptions}
+                            optionFilterProp="label"
+                        />
                     </Form.Item>
 
                     <Form.Item

@@ -46,6 +46,11 @@ const GuideSchema = new mongoose.Schema(
             enum: ["active", "inactive"],
             default: "active",
         },
+        listing: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Listing",
+            default: null,
+        },
     },
     { timestamps: true }
 );

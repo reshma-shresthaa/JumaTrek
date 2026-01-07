@@ -24,10 +24,12 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
+import TrekInformation from './TrekInformation';
+
 const { Option } = Select;
 const { Text, Title, Paragraph } = Typography;
 
-const TrekDetailsStep = ({ formData, onInputChange, popularTreks }) => {
+const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }) => {
   const calculateEndDate = (startDate, duration) => {
     if (!startDate) return null;
     return dayjs(startDate).add(duration - 1, 'day');
@@ -48,55 +50,8 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks }) => {
   };
 
   const renderTrekInfo = () => {
-    if (formData.destination === 'everest_base_camp') {
-      return (
-        <div className="trek-info-content">
-          <div className="trek-header" style={{ marginBottom: '1rem' }}>
-            <h3 className="trek-title" style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Everest Base Camp Trek</h3>
-            <div className="trek-highlights" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <Tag color="blue"><ClockCircleOutlined /> 12-14 days</Tag>
-              <Tag color="green"><EnvironmentOutlined /> Max 5,545m</Tag>
-              <Tag color="orange"><FireOutlined /> Challenging</Tag>
-            </div>
-          </div>
-          <Paragraph className="trek-description">
-            The classic trek to the base of the world's highest mountain. Experience Sherpa culture,
-            stunning Himalayan views, and the famous Namche Bazaar. This iconic journey takes you through
-            beautiful Sherpa villages, ancient monasteries, and breathtaking landscapes.
-          </Paragraph>
-          <Divider style={{ margin: '16px 0' }} />
-          <div className="details-grid">
-            <div className="detail-item">
-              <div className="detail-icon-wrapper"><ClockCircleOutlined /></div>
-              <div>
-                <div className="detail-label helper-text">Duration</div>
-                <div className="detail-value">12-14 days</div>
-              </div>
-            </div>
-            <div className="detail-item">
-              <div className="detail-icon-wrapper"><EnvironmentOutlined /></div>
-              <div>
-                <div className="detail-label helper-text">Max Altitude</div>
-                <div className="detail-value">5,364m (17,598 ft)</div>
-              </div>
-            </div>
-            <div className="detail-item">
-              <div className="detail-icon-wrapper"><FireOutlined /></div>
-              <div>
-                <div className="detail-label helper-text">Difficulty</div>
-                <div className="detail-value">Challenging</div>
-              </div>
-            </div>
-            <div className="detail-item">
-              <div className="detail-icon-wrapper"><GlobalOutlined /></div>
-              <div>
-                <div className="detail-label helper-text">Best Season</div>
-                <div className="detail-value">Mar-May, Sep-Nov</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+    if (formData.destination && formData.destination !== 'custom') {
+      return <TrekInformation destination={formData.destination} />;
     } else if (formData.destination === 'custom' && formData.customDestination) {
       return (
         <div className="trek-info-content">
@@ -178,8 +133,8 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks }) => {
                 size="large"
                 style={{ width: '100%' }}
               >
-                {popularTreks.map(trek => (
-                  <Option key={trek.value} value={trek.value}>
+                {destinations && destinations.map(trek => (
+                  <Option key={trek.value} value={trek.value} label={trek.label}>
                     <div style={{ padding: '4px 0' }}>
                       <div className="option-title">{trek.label}</div>
                       {trek.duration && (

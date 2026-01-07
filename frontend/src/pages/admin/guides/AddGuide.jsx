@@ -11,11 +11,30 @@ const AddGuide = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [fileList, setFileList] = useState([]);
+    const [listingOptions, setListingOptions] = useState([]);
     const navigate = useNavigate();
 
     const handleUploadChange = ({ fileList: newFileList }) => {
         setFileList(newFileList.slice(-1)); // keep only latest file
     };
+
+    const fetchListings = async () => {
+        try {
+            const res = await adminService.getAllListings({ limit: 100 });
+            const options = (res.data || res.listings || res?.data?.data || res?.data?.listings || [])
+                .map((item) => ({
+                    label: item.title,
+                    value: item._id,
+                }));
+            setListingOptions(options);
+        } catch (error) {
+            // non-blocking
+        }
+    };
+
+    React.useEffect(() => {
+        fetchListings();
+    }, []);
 
     const handleSubmit = async (values) => {
         setLoading(true);
@@ -37,6 +56,9 @@ const AddGuide = () => {
             formData.append('totalTrips', 0);
             formData.append('status', 'active');
             formData.append('photo', fileList[0].originFileObj);
+            if (values.listing) {
+                formData.append('listing', values.listing);
+            }
 
             const res = await adminService.createGuide(formData);
             if (res?.success) {
@@ -67,6 +89,19 @@ const AddGuide = () => {
                         certifications: [],
                     }}
                 >
+                    <Form.Item
+                        name="listing"
+                        label="Linked Listing (optional)"
+                    >
+                        <Select
+                            showSearch
+                            allowClear
+                            placeholder="Select a listing to link this guide"
+                            options={listingOptions}
+                            optionFilterProp="label"
+                        />
+                    </Form.Item>
+
                     <Form.Item
                         name="name"
                         label="Full Name"

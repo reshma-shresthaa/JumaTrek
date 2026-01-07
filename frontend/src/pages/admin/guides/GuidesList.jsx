@@ -89,6 +89,12 @@ const GuidesList = () => {
             sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
+            title: 'Listing',
+            dataIndex: 'listing',
+            key: 'listing',
+            render: (listing) => listing?.title || '—',
+        },
+        {
             title: 'Experience',
             dataIndex: 'experience',
             key: 'experience',

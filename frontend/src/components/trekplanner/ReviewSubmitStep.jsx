@@ -34,6 +34,7 @@ const ReviewSubmitStep = ({
   onSubmit,
   loading,
   popularTreks,
+  destinations,
   groupTypes,
   experienceLevels,
   fitnessLevels,
@@ -43,7 +44,8 @@ const ReviewSubmitStep = ({
   const [form] = Form.useForm();
 
   const getTrekName = (value) => {
-    const trek = popularTreks.find(t => t.value === value);
+    const list = destinations && destinations.length > 0 ? destinations : popularTreks;
+    const trek = list.find(t => t.value === value);
     return trek ? trek.label : formData.customDestination || 'Custom Trek';
   };
 

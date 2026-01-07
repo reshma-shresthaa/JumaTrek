@@ -43,6 +43,11 @@ export const createGuide = async (req, res) => {
             payload.photo = req.file.path;
         }
 
+        // Normalize listing reference if sent as string
+        if (payload.listing === "" || payload.listing === "null") {
+            payload.listing = null;
+        }
+
         if (typeof payload.specialization === "string") {
             payload.specialization = [payload.specialization];
         }
@@ -76,6 +81,10 @@ export const updateGuide = async (req, res) => {
 
         if (req.file && req.file.path) {
             payload.photo = req.file.path;
+        }
+
+        if (payload.listing === "" || payload.listing === "null") {
+            payload.listing = null;
         }
 
         if (typeof payload.specialization === "string") {

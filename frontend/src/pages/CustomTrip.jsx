@@ -17,6 +17,8 @@ import {
   CheckCircleOutlined, SmileOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
+
+const API_BASE = import.meta?.env?.VITE_API_BASE || 'http://localhost:5000';
 import './CustomTrip.css';
 
 // Import step components
@@ -360,33 +362,30 @@ const CustomTrip = () => {
   };
 
   useEffect(() => {
-    // Fetch destinations from your API
     const fetchDestinations = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get('/api/destinations');
-        // Ensure we have an array before setting state
-        if (Array.isArray(response?.data)) {
-          setDestinations(response.data);
-        } else {
-          console.warn('Expected an array of destinations but received:', response?.data);
-          setDestinations([
-            { _id: 'everest', name: 'Everest Base Camp' },
-            { _id: 'annapurna', name: 'Annapurna Circuit' },
-            { _id: 'langtang', name: 'Langtang Valley' },
-            { _id: 'manaslu', name: 'Manaslu Circuit' },
-            { _id: 'mustang', name: 'Upper Mustang' }
-          ]);
+        const response = await axios.get(`${API_BASE}/api/listing`);
+        if (response.data.success) {
+          const dbDestinations = response.data.data.map(listing => ({
+            value: listing.title, // Use title as value for backend lookup
+            label: listing.title,
+            duration: listing.duration,
+          }));
+
+          // Combine with "Custom Route" option
+          setDestinations([...dbDestinations, { value: 'custom', label: 'Custom Route' }]);
         }
       } catch (error) {
         console.error('Error fetching destinations:', error);
-        // Fallback to default destinations if API fails
-        setDestinations([
-          { _id: 'everest', name: 'Everest Base Camp' },
-          { _id: 'annapurna', name: 'Annapurna Circuit' },
-          { _id: 'langtang', name: 'Langtang Valley' },
-          { _id: 'manaslu', name: 'Manaslu Circuit' },
-          { _id: 'mustang', name: 'Upper Mustang' }
-        ]);
+        // Fallback to static list if API fails
+        const staticDestinations = popularTreks.map(trek => ({
+          value: trek.value,
+          label: trek.label,
+        }));
+        setDestinations(staticDestinations);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -535,7 +534,7 @@ const CustomTrip = () => {
 
       try {
         // Make the API call with authentication
-        const response = await axios.post('/api/custom-trips', submissionData, {
+        const response = await axios.post(`${API_BASE}/api/custom-trips`, submissionData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -645,6 +644,7 @@ const CustomTrip = () => {
             onSubmit={handleSubmit}
             loading={loading}
             popularTreks={popularTreks}
+            destinations={destinations}
             groupTypes={groupTypes}
             experienceLevels={experienceLevels}
             fitnessLevels={fitnessLevels}
