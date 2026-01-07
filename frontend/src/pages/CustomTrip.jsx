@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Select, InputNumber, Slider, Button, Steps, Form, Input, DatePicker,
   Card, Row, Col, Typography, Divider, Collapse, Tag, Alert, Checkbox, Radio,
-  message, Spin, Result
+  message, Spin, Result, Modal
 } from 'antd';
 import dayjs from 'dayjs';
 import {
@@ -248,9 +248,9 @@ const CustomTrip = () => {
 
     // Only load draft if user explicitly wants to continue
     const loadDraft = () => {
-      const pendingTrip = localStorage.getItem('pendingCustomTrip');
-      if (pendingTrip) {
-        try {
+      try {
+        const pendingTrip = localStorage.getItem('pendingCustomTrip');
+        if (pendingTrip) {
           const tripData = JSON.parse(pendingTrip);
           const { isAuthenticated } = checkAuth();
 
@@ -285,26 +285,49 @@ const CustomTrip = () => {
               okText: 'Continue Draft',
               cancelText: 'Start New Trip',
               onOk() {
-                setFormData(tripData);
-                setHasPendingTrip(true);
-                if (form) {
-                  form.setFieldsValue(tripData);
+                try {
+                  setFormData(tripData);
+                  setHasPendingTrip(true);
+                  if (form) {
+                    form.setFieldsValue(tripData);
+                  }
+                } catch (error) {
+                  console.error('Error loading draft:', error);
+                  message.error('Error loading draft. Starting a new trip.');
+                  localStorage.removeItem('pendingCustomTrip');
                 }
               },
               onCancel() {
                 // Clear the draft if user wants to start fresh
                 localStorage.removeItem('pendingCustomTrip');
-              },
+              }
             });
           }
-        } catch (error) {
-          console.error('Error parsing pending trip data:', error);
-          localStorage.removeItem('pendingCustomTrip');
         }
+      } catch (error) {
+        console.error('Error processing draft data:', error);
+        localStorage.removeItem('pendingCustomTrip');
       }
     };
 
     loadDraft();
+    
+    // Clean up function to clear draft if component unmounts
+    return () => {
+      const pendingTrip = localStorage.getItem('pendingCustomTrip');
+      if (pendingTrip) {
+        try {
+          const tripData = JSON.parse(pendingTrip);
+          if (tripData.isDraft) {
+            // Update the last saved time when navigating away
+            const updatedTrip = { ...tripData, lastSaved: new Date().toISOString() };
+            localStorage.setItem('pendingCustomTrip', JSON.stringify(updatedTrip));
+          }
+        } catch (error) {
+          console.error('Error saving draft:', error);
+        }
+      }
+    };
   }, [form]);
 
   // Form steps configuration
@@ -444,129 +467,55 @@ const CustomTrip = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const checkAuth = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    return {
-      isAuthenticated: !!user,
-      token: user?.token
-    };
-  };
-
-  const handleSubmit = async (formValues) => {
-    console.log('Form submitted with values:', formValues);
-    if (!form) {
-      console.error('Form instance not available');
-      message.error('Form initialization error. Please refresh the page.');
-      return;
-    }
-    if (!form) {
-      console.error('Form instance not available');
-      message.error('Form initialization error. Please refresh the page.');
-      return;
-    }
-    setLoading(true);
+  // Handle form submission
+  const handleSubmit = async () => {
     try {
-      // Check authentication status
-      const { isAuthenticated } = checkAuth();
-
-      if (!isAuthenticated) {
-        // Save form data to localStorage before redirecting to login
-        const formDataToSave = {
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Save form data to localStorage before redirecting
+        const formValues = form.getFieldsValue(true);
+        const pendingTrip = {
           ...formData,
           ...formValues,
-          contactInfo: {
-            ...formData.contactInfo,
-            ...(formValues.contactInfo || {}),
-            emergencyContact: {
-              ...(formData.contactInfo?.emergencyContact || {}),
-              ...(formValues.emergencyContact || {})
-            }
-          },
-          termsAgreed: formValues.termsAgreed || false,
           isDraft: true,
-          isSubmissionPending: true, // Flag to indicate we should try to submit after login
-          timestamp: new Date().toISOString()
+          lastSaved: new Date().toISOString()
         };
-
-        localStorage.setItem('pendingCustomTrip', JSON.stringify(formDataToSave));
-
-        // Show message and redirect to login
-        message.info('Please sign in to submit your custom trip request');
-        navigate('/login', {
-          state: {
-            from: 'custom-trip',
-            message: 'Please sign in to complete your custom trip submission'
-          }
-        });
+        localStorage.setItem('pendingCustomTrip', JSON.stringify(pendingTrip));
+        
+        // Redirect to login with redirect URL
+        message.info('Please login to submit your custom trip');
+        navigate('/auth?redirect=/custom-trip');
         return;
       }
-
-      // If user is authenticated, proceed with submission
-      const submissionData = {
-        ...formValues,
-        ...formData,
-        contactInfo: {
-          name: formValues.contactInfo?.name || formData.contactInfo?.name || '',
-          email: formValues.contactInfo?.email || formData.contactInfo?.email || '',
-          phone: formValues.contactInfo?.phone || formData.contactInfo?.phone || '',
-          country: formValues.contactInfo?.country || formData.contactInfo?.country || '',
-          emergencyContact: {
-            name: formValues.contactInfo?.emergencyContact?.name || formData.contactInfo?.emergencyContact?.name || '',
-            relationship: formValues.contactInfo?.emergencyContact?.relationship || formData.contactInfo?.emergencyContact?.relationship || '',
-            phone: formValues.contactInfo?.emergencyContact?.phone || formData.contactInfo?.emergencyContact?.phone || ''
-          }
-        },
-        termsAgreed: formValues.termsAgreed || false
-      };
-
-      // Validate required fields
-      if (!submissionData.destination) {
-        throw new Error('Please select a destination');
-      }
-      if (!submissionData.startDate) {
-        throw new Error('Please select a start date');
-      }
-      if (!submissionData.contactInfo?.name || !submissionData.contactInfo?.email) {
-        throw new Error('Please provide your contact information');
-      }
-
-      console.log('Submitting form data:', submissionData);
-
+      
+      setLoading(true);
+      
       try {
-        // Make the API call with authentication
-        const response = await axios.post(`${API_BASE}/api/custom-trips`, submissionData, {
+        // Get form values
+        const values = await form.validateFields();
+        const tripData = { ...formData, ...values };
+        
+        // Save to database
+        await axios.post('/api/trips/custom', tripData, {
           headers: {
             'Content-Type': 'application/json',
-          },
-          withCredentials: true
-        });
-
-        console.log('Submission successful:', response.data);
-
-        // Show success message
-        message.success('Your custom trek request has been submitted successfully!');
-
-        // Clear form and any pending trip data
-        form.resetFields();
-        localStorage.removeItem('pendingCustomTrip');
-
-        // Show success message with a button to create another trip
-        Modal.success({
-          title: 'Trip Submitted Successfully!',
-          content: 'Your custom trip request has been received. You will be redirected to your profile.',
-          okText: 'Create Another Trip',
-          onOk: () => {
-            // Reset form for new trip
-            form.resetFields();
-            setCurrentStep(0);
+            'Authorization': `Bearer ${token}`
           }
         });
-
-        // Redirect to user profile after 5 seconds if user doesn't click the button
+        
+        // Clear any pending trip data
+        localStorage.removeItem('pendingCustomTrip');
+        
+        // Mark as submitted and show success message
+        setFormSubmitted(true);
+        message.success('Your custom trip has been submitted successfully!');
+        
+        // Redirect to profile page after a short delay
         setTimeout(() => {
           navigate('/profile');
-        }, 5000);
-
+        }, 3000);
+        
       } catch (apiError) {
         console.error('API Error:', apiError);
         const errorMessage = apiError.response?.data?.message || 'Failed to submit your request. Please try again.';
@@ -576,14 +525,12 @@ const CustomTrip = () => {
           message.error('Your session has expired. Please sign in again.');
           navigate('/login', { state: { from: 'custom-trip' } });
         } else {
-          throw new Error(errorMessage);
+          message.error(errorMessage);
         }
       }
-
     } catch (error) {
       console.error('Error in form submission:', error);
       message.error(error.message || 'Failed to submit your request. Please try again.');
-      return Promise.reject(error);
     } finally {
       setLoading(false);
     }

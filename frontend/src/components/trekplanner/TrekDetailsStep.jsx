@@ -1,16 +1,18 @@
 import React from 'react';
-import {
-  Row,
-  Col,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  Card,
-  Typography,
-  Slider,
+import { 
+  Row, 
+  Col, 
+  Form, 
+  Input, 
+  InputNumber,
+  Select, 
+  DatePicker, 
+  Card, 
+  Typography, 
+  Slider, 
   Divider,
-  Tag
+  Tag,
+  Tooltip
 } from 'antd';
 import {
   EnvironmentOutlined,
@@ -18,9 +20,10 @@ import {
   FireOutlined,
   GlobalOutlined,
   InfoCircleOutlined,
+  StarFilled,
   CalendarOutlined,
-  CompassOutlined,
-  CheckCircleOutlined
+  FieldTimeOutlined,
+  CompassOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
@@ -49,59 +52,80 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
     }
   };
 
-  const renderTrekInfo = () => {
-    if (formData.destination && formData.destination !== 'custom') {
-      return <TrekInformation destination={formData.destination} />;
-    } else if (formData.destination === 'custom' && formData.customDestination) {
-      return (
-        <div className="trek-info-content">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Custom Trek: {formData.customDestination}</h3>
-          <Paragraph>
-            We'll work with you to create a personalized trekking experience based on your preferences.
-            Our experts will contact you to discuss the details and create a custom itinerary tailored to
-            your fitness level, interests, and schedule.
-          </Paragraph>
-          <div className="custom-trek-features" style={{ marginTop: '1rem' }}>
-            <div className="feature-item" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-              <span>Personalized Itinerary</span>
-            </div>
-            <div className="feature-item" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-              <span>Flexible Duration</span>
-            </div>
-            <div className="feature-item" style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-              <span>Custom Difficulty Level</span>
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="trek-info-content">
-          <div className="empty-state" style={{ textAlign: 'center', padding: '2rem 0' }}>
-            <CompassOutlined style={{ fontSize: '3rem', color: '#e2e8f0', marginBottom: '1rem' }} />
-            <h3 style={{ color: '#4a5568', fontWeight: 600 }}>Select a Trek</h3>
-            <p style={{ color: '#718096' }}>
-              Choose from our popular treks or create a custom adventure.
-              Each trek includes detailed information to help you make the best choice.
-            </p>
-          </div>
-        </div>
-      );
-    }
+  const getTrekInfo = (destination) => {
+    const treks = {
+      'everest_base_camp': {
+        title: 'Everest Base Camp Trek',
+        description: 'The classic trek to the base of the world\'s highest mountain. Experience Sherpa culture, stunning Himalayan views, and the famous Namche Bazaar.',
+        duration: '12-14 days',
+        altitude: '5,545m',
+        difficulty: 'Challenging',
+        bestSeason: 'Mar-May, Sep-Nov',
+        highlights: [
+          'Spectacular views of Mount Everest',
+          'Explore Sherpa culture in Namche Bazaar',
+          'Visit Tengboche Monastery',
+          'Kala Patthar sunrise view'
+        ]
+      },
+      'annapurna_circuit': {
+        title: 'Annapurna Circuit Trek',
+        description: 'One of the most diverse treks in the world, offering a variety of landscapes from subtropical forests to high-altitude deserts.',
+        duration: '15-20 days',
+        altitude: '5,416m',
+        difficulty: 'Moderate to Challenging',
+        bestSeason: 'Mar-May, Sep-Nov',
+        highlights: [
+          'Cross the Thorong La Pass',
+          'Natural hot springs at Tatopani',
+          'Poon Hill sunrise',
+          'Diverse landscapes and cultures'
+        ]
+      },
+      'langtang_valley': {
+        title: 'Langtang Valley Trek',
+        description: 'A beautiful trek through the Langtang Valley, known as the "Valley of Glaciers", with stunning mountain views and rich Tamang culture.',
+        duration: '10-12 days',
+        altitude: '4,984m',
+        difficulty: 'Moderate',
+        bestSeason: 'Mar-May, Sep-Nov',
+        highlights: [
+          'Less crowded than other treks',
+          'Rich Tamang culture',
+          'Kyanjin Gompa and cheese factory',
+          'Langtang National Park wildlife'
+        ]
+      }
+    };
+    
+    return treks[destination] || {
+      title: 'Custom Trek',
+      description: 'We\'ll work with you to create a personalized trekking experience based on your preferences.',
+      duration: 'Custom',
+      altitude: 'Custom',
+      difficulty: 'Custom',
+      bestSeason: 'Year-round',
+      highlights: [
+        'Personalized itinerary',
+        'Flexible duration',
+        'Custom difficulty level',
+        'Tailored to your interests'
+      ]
+    };
   };
 
+  const currentTrek = getTrekInfo(formData.destination);
+  const isCustomTrek = formData.destination === 'custom';
+
   return (
-    <div className="step-content">
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <Title level={3}>
-          <EnvironmentOutlined style={{ marginRight: '8px', color: '#1a73e8' }} />
+    <div className="step-content trek-details-step">
+      <div className="text-center mb-8">
+        <Title level={3} className="flex items-center justify-center">
+          <EnvironmentOutlined className="mr-2 text-blue-500" />
           Trek Details
         </Title>
-        <Text type="secondary">
-          Start planning your perfect trekking adventure
+        <Text type="secondary" className="text-base">
+          Tell us about your trekking preferences and we'll help you plan the perfect adventure
         </Text>
       </div>
 
@@ -110,157 +134,594 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
           <Card
             className="step-card"
             title={
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div className="card-icon-wrapper">
-                  <EnvironmentOutlined />
+              <div className="flex items-center">
+                <div className="card-title-icon">
+                  <CompassOutlined />
                 </div>
-                <span>Trek Selection</span>
+                <h4>Trek Selection</h4>
               </div>
             }
           >
-            <Form.Item
-              label="Select Trek"
-              name="destination"
-              tooltip={{ title: "Choose from our popular treks or select custom", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-              rules={[{ required: true, message: 'Please select a trek' }]}
-            >
-              <Select
-                placeholder="Select a popular trek or choose custom"
-                onChange={(value) => onInputChange('destination', value)}
-                value={formData.destination}
-                showSearch
-                optionFilterProp="label"
-                size="large"
-                style={{ width: '100%' }}
+            <div className="space-y-6">
+              <Form.Item
+                label={
+                  <div className="form-label">
+                    <span>Select Trek</span>
+                    <Tooltip title="Choose from our popular treks or select custom">
+                      <InfoCircleOutlined className="info-icon" />
+                    </Tooltip>
+                  </div>
+                }
+                name="destination"
+                rules={[{ required: true, message: 'Please select a trek' }]}
               >
-                {destinations && destinations.map(trek => (
-                  <Option key={trek.value} value={trek.value} label={trek.label}>
-                    <div style={{ padding: '4px 0' }}>
-                      <div className="option-title">{trek.label}</div>
-                      {trek.duration && (
-                        <div className="helper-text">{trek.duration} days</div>
-                      )}
+                <Select
+                  className="trek-select"
+                  placeholder="Select a popular trek or choose custom"
+                  onChange={(value) => onInputChange('destination', value)}
+                  value={formData.destination}
+                  showSearch
+                  optionFilterProp="label"
+                  size="large"
+                >
+                  {popularTreks.map(trek => (
+                    <Option key={trek.value} value={trek.value}>
+                      <div className="option-content">
+                        <div className="option-title">{trek.label}</div>
+                        <div className="option-description">{trek.description}</div>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              
+              {isCustomTrek && (
+                <Form.Item
+                  label={
+                    <div className="form-label">
+                      <span>Custom Destination</span>
+                      <Tooltip title="Enter your desired trekking destination">
+                        <InfoCircleOutlined className="info-icon" />
+                      </Tooltip>
                     </div>
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            {formData.destination === 'custom' && (
-              <Form.Item
-                label="Custom Destination"
-                name="customDestination"
-                tooltip={{ title: "Tell us about your dream trek destination", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-                rules={[
-                  {
-                    required: formData.destination === 'custom',
-                    message: 'Please specify your custom destination'
                   }
-                ]}
-              >
-                <Input
-                  placeholder="Enter your custom trek destination"
-                  onChange={(e) => onInputChange('customDestination', e.target.value)}
-                  value={formData.customDestination}
-                  size="large"
-                />
-              </Form.Item>
-            )}
-
-            <div style={{ margin: '24px 0' }}>
-              <Form.Item
-                label="Start Date"
-                name="startDate"
-                tooltip={{ title: "Select your preferred start date", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-                rules={[{ required: true, message: 'Please select a start date' }]}
-              >
-                <DatePicker
-                  onChange={handleDateChange}
-                  disabledDate={(current) => {
-                    return current && current < dayjs().startOf('day');
-                  }}
-                  size="large"
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label={`Trek Duration: ${formData.duration} days`}
-                name="duration"
-                tooltip={{ title: "Adjust the slider to set your trek duration", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-                rules={[{ required: true, message: 'Please select trek duration' }]}
-              >
+                  name="customDestination"
+                  rules={[
+                    { 
+                      required: isCustomTrek, 
+                      message: 'Please specify your custom destination' 
+                    }
+                  ]}
+                >
+                  <Input 
+                    placeholder="Enter your custom trek destination"
+                    onChange={(e) => onInputChange('customDestination', e.target.value)}
+                    value={formData.customDestination}
+                    size="large"
+                  />
+                </Form.Item>
+              )}
+              
+              <div className="date-duration-section">
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      label={
+                        <div className="form-label">
+                          <span>Start Date</span>
+                          <Tooltip title="Your preferred trek start date">
+                            <CalendarOutlined className="info-icon" />
+                          </Tooltip>
+                        </div>
+                      }
+                      name="startDate"
+                      rules={[{ required: true, message: 'Please select a start date' }]}
+                    >
+                      <DatePicker 
+                        className="w-full"
+                        onChange={handleDateChange}
+                        disabledDate={(current) => current && current < dayjs().startOf('day')}
+                        size="large"
+                        placeholder="Select date"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      label={
+                        <div className="form-label">
+                          <span>Duration</span>
+                          <Tooltip title="Number of trekking days">
+                            <FieldTimeOutlined className="info-icon" />
+                          </Tooltip>
+                        </div>
+                      }
+                      name="duration"
+                      rules={[{ required: true, message: 'Please select trek duration' }]}
+                    >
+                      <InputNumber 
+                        min={1}
+                        max={30}
+                        className="w-full"
+                        onChange={handleDurationChange}
+                        value={formData.duration}
+                        size="large"
+                        placeholder="Days"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                
+                {formData.startDate && formData.duration > 0 && (
+                  <div className="date-summary">
+                    <div className="date-summary-content">
+                      <div className="date-summary-dates">
+                        <span className="date-label">Your Trek:</span>
+                        <span className="date-range">
+                          {dayjs(formData.startDate).format('MMM D, YYYY')} - {formData.endDate.format('MMM D, YYYY')}
+                        </span>
+                      </div>
+                      <Tag color="blue" className="duration-tag">
+                        {formData.duration} {formData.duration === 1 ? 'Day' : 'Days'}
+                      </Tag>
+                    </div>
+                    <div className="date-note">
+                      <InfoCircleOutlined className="mr-1" />
+                      Dates are flexible and can be adjusted based on availability
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="duration-slider">
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-gray-600">Trek Duration: {formData.duration} days</span>
+                  <span className="text-sm text-gray-400">1-30 days</span>
+                </div>
                 <Slider
                   min={1}
                   max={30}
-                  marks={{
-                    1: '1',
-                    5: '5',
-                    10: '10',
-                    15: '15',
-                    20: '20',
-                    25: '25',
-                    30: '30+'
-                  }}
+                  tooltip={{ formatter: (value) => `${value} days` }}
                   onChange={handleDurationChange}
                   value={formData.duration}
-                  tooltip={{ formatter: (value) => `${value} days` }}
+                  trackStyle={{ backgroundColor: '#4f46e5' }}
+                  handleStyle={{
+                    borderColor: '#4f46e5',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                  }}
                 />
-              </Form.Item>
-            </div>
-
-            {formData.startDate && formData.duration > 0 && (
-              <div style={{
-                display: 'flex',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                padding: '16px',
-                marginTop: '16px'
-              }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: '#e0e7ff',
-                  color: '#4f46e5',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '16px',
-                  fontSize: '1.2rem'
-                }}>
-                  <CalendarOutlined />
-                </div>
-                <div>
-                  <div className="helper-text" style={{ textTransform: 'uppercase', marginBottom: '2px' }}>Your Trek Dates</div>
-                  <div style={{ fontWeight: 600, color: '#1e293b' }}>
-                    {dayjs(formData.startDate).format('MMM D, YYYY')} - {formData.endDate.format('MMM D, YYYY')}
-                  </div>
-                  <div style={{ fontSize: '13px', color: '#64748b' }}>
-                    {formData.duration} {formData.duration === 1 ? 'day' : 'days'} total
-                  </div>
-                </div>
               </div>
-            )}
+            </div>
           </Card>
         </Col>
 
         <Col xs={24} md={12}>
-          <Card
-            className="step-card"
-            title={
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div className="card-icon-wrapper">
-                  <CompassOutlined />
+          <div className="sticky top-6 space-y-6">
+            <Card 
+              className="trek-preview-card"
+              title={
+                <div className="flex items-center">
+                  <div className="card-title-icon">
+                    <StarFilled />
+                  </div>
+                  <h4>Trek Preview</h4>
                 </div>
-                <span>Trek Information</span>
+              }
+            >
+              <div className="trek-preview-content">
+                {!formData.destination ? (
+                  <div className="empty-state">
+                    <EnvironmentOutlined className="text-4xl text-gray-300 mb-4" />
+                    <h4>Select a Trek</h4>
+                    <p className="text-gray-500">Choose a trek from the options to see details and preview</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="trek-header">
+                      <h3 className="trek-title">
+                        {isCustomTrek && formData.customDestination 
+                          ? formData.customDestination 
+                          : currentTrek.title}
+                      </h3>
+                      {!isCustomTrek && (
+                        <Tag color="blue" className="trek-tag">
+                          Popular
+                        </Tag>
+                      )}
+                    </div>
+                    
+                    <p className="trek-description">
+                      {isCustomTrek 
+                        ? 'We\'ll work with you to create a personalized trekking experience based on your preferences. Our experts will contact you to discuss the details and create a custom itinerary.'
+                        : currentTrek.description}
+                    </p>
+                    
+                    <div className="trek-stats">
+                      <div className="stat-item">
+                        <div className="stat-icon">
+                          <ClockCircleOutlined />
+                        </div>
+                        <div>
+                          <div className="stat-label">Duration</div>
+                          <div className="stat-value">
+                            {isCustomTrek ? 'Custom' : currentTrek.duration}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="stat-item">
+                        <div className="stat-icon">
+                          <EnvironmentOutlined />
+                        </div>
+                        <div>
+                          <div className="stat-label">Max Altitude</div>
+                          <div className="stat-value">
+                            {isCustomTrek ? 'Custom' : currentTrek.altitude}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="stat-item">
+                        <div className="stat-icon">
+                          <FireOutlined />
+                        </div>
+                        <div>
+                          <div className="stat-label">Difficulty</div>
+                          <div className="stat-value">
+                            {isCustomTrek ? 'Custom' : currentTrek.difficulty}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="stat-item">
+                        <div className="stat-icon">
+                          <GlobalOutlined />
+                        </div>
+                        <div>
+                          <div className="stat-label">Best Season</div>
+                          <div className="stat-value">
+                            {isCustomTrek ? 'Year-round' : currentTrek.bestSeason}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Divider className="preview-divider" />
+                    
+                    <div className="trek-highlights">
+                      <h4 className="highlights-title">Trek Highlights</h4>
+                      <ul className="highlights-list">
+                        {currentTrek.highlights.map((highlight, index) => (
+                          <li key={index} className="highlight-item">
+                            <span className="highlight-bullet">•</span>
+                            {highlight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    {isCustomTrek && (
+                      <div className="custom-trek-note">
+                        <InfoCircleOutlined className="mr-2" />
+                        Our team will contact you within 24 hours to discuss your custom trek requirements in detail.
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            }
-          >
-            {renderTrekInfo()}
-          </Card>
+            </Card>
+            
+            <Card className="trek-tips-card">
+              <div className="flex items-start">
+                <div className="tips-icon">
+                  <InfoCircleOutlined />
+                </div>
+                <div>
+                  <h4 className="tips-title">Planning Your Trek</h4>
+                  <p className="tips-content">
+                    Need help choosing the perfect trek? Our experts are here to help you select the best 
+                    route based on your fitness level, experience, and interests. 
+                    <a href="#" className="text-blue-500 hover:underline ml-1">Contact us</a> for personalized advice.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </Col>
       </Row>
+      
+      <style jsx>{`
+        .trek-details-step {
+          padding: 0 8px;
+        }
+        
+        .card-title-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background-color: #eef2ff;
+          color: #4f46e5;
+          margin-right: 12px;
+        }
+        
+        .trek-selection-card,
+        .trek-preview-card {
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          margin-bottom: 24px;
+          overflow: hidden;
+        }
+        
+        .trek-selection-card :global(.ant-card-head),
+        .trek-preview-card :global(.ant-card-head) {
+          background-color: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 0 20px;
+          min-height: 60px;
+        }
+        
+        .trek-selection-card :global(.ant-card-head-title),
+        .trek-preview-card :global(.ant-card-head-title) {
+          padding: 16px 0;
+        }
+        
+        .trek-selection-card h4,
+        .trek-preview-card h4 {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1e293b;
+          margin: 0;
+        }
+        
+        .form-label {
+          display: flex;
+          align-items: center;
+          font-weight: 500;
+          color: #334155;
+          font-size: 14px;
+          margin-bottom: 6px;
+        }
+        
+        .info-icon {
+          margin-left: 6px;
+          color: #94a3b8;
+          font-size: 14px;
+          cursor: help;
+        }
+        
+        .date-duration-section {
+          background-color: #f8fafc;
+          border-radius: 8px;
+          padding: 16px;
+          margin: 16px 0;
+        }
+        
+        .date-summary {
+          background-color: white;
+          border-radius: 6px;
+          padding: 12px;
+          margin-top: 16px;
+          border: 1px solid #e2e8f0;
+        }
+        
+        .date-summary-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        
+        .date-summary-dates {
+          display: flex;
+          align-items: center;
+        }
+        
+        .date-label {
+          font-size: 13px;
+          color: #64748b;
+          margin-right: 8px;
+        }
+        
+        .date-range {
+          font-weight: 500;
+          color: #1e293b;
+        }
+        
+        .duration-tag {
+          font-weight: 600;
+          background-color: #eef2ff;
+          color: #4f46e5;
+          border: none;
+        }
+        
+        .date-note {
+          font-size: 12px;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+        }
+        
+        .duration-slider {
+          margin-top: 24px;
+          padding: 0 8px;
+        }
+        
+        .trek-preview-content {
+          min-height: 200px;
+        }
+        
+        .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 32px 16px;
+          color: #94a3b8;
+        }
+        
+        .empty-state h4 {
+          margin: 8px 0 4px;
+          color: #475569;
+        }
+        
+        .trek-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 12px;
+        }
+        
+        .trek-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1e293b;
+          margin: 0;
+        }
+        
+        .trek-tag {
+          margin-left: 8px;
+          font-size: 12px;
+          height: 22px;
+          line-height: 20px;
+        }
+        
+        .trek-description {
+          color: #475569;
+          font-size: 14px;
+          line-height: 1.6;
+          margin-bottom: 16px;
+        }
+        
+        .trek-stats {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin: 20px 0;
+        }
+        
+        .stat-item {
+          display: flex;
+          align-items: center;
+        }
+        
+        .stat-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          background-color: #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 12px;
+          color: #4f46e5;
+          font-size: 16px;
+        }
+        
+        .stat-label {
+          font-size: 12px;
+          color: #64748b;
+          margin-bottom: 2px;
+        }
+        
+        .stat-value {
+          font-size: 14px;
+          font-weight: 500;
+          color: #1e293b;
+        }
+        
+        .preview-divider {
+          margin: 20px 0;
+          border-color: #e2e8f0;
+        }
+        
+        .highlights-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 12px;
+        }
+        
+        .highlights-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        
+        .highlight-item {
+          display: flex;
+          margin-bottom: 8px;
+          font-size: 14px;
+          color: #475569;
+          line-height: 1.5;
+        }
+        
+        .highlight-bullet {
+          color: #4f46e5;
+          margin-right: 8px;
+          font-weight: bold;
+        }
+        
+        .custom-trek-note {
+          background-color: #f0f9ff;
+          border-left: 3px solid #0ea5e9;
+          padding: 12px;
+          border-radius: 4px;
+          font-size: 13px;
+          color: #0369a1;
+          margin-top: 16px;
+          display: flex;
+          align-items: flex-start;
+        }
+        
+        .trek-tips-card {
+          border-radius: 8px;
+          background-color: #f8fafc;
+          border: 1px dashed #cbd5e1;
+        }
+        
+        .tips-icon {
+          color: #4f46e5;
+          font-size: 18px;
+          margin-right: 12px;
+          margin-top: 2px;
+        }
+        
+        .tips-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: #1e293b;
+          margin: 0 0 6px 0;
+        }
+        
+        .tips-content {
+          font-size: 13px;
+          color: #475569;
+          margin: 0;
+          line-height: 1.5;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+          .trek-stats {
+            grid-template-columns: 1fr;
+          }
+          
+          .date-duration-section {
+            padding: 12px;
+          }
+          
+          .trek-selection-card,
+          .trek-preview-card {
+            margin-bottom: 16px;
+          }
+        }
+      `}</style>
     </div>
   );
 };
