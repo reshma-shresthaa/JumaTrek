@@ -1,201 +1,145 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { trekService } from '../services/api';
 
 // Format price to USD with comma separators
 const formatPrice = (priceInUsd) => {
-  return `$${priceInUsd.toLocaleString()}`;
+  return priceInUsd ? `$${priceInUsd.toLocaleString()}` : 'N/A';
 };
-
-// Extended trek data for all treks page
-export const allTrekData = [
-  // Popular Treks
-  {
-    id: 1,
-    title: "Everest Base Camp Trek",
-    region: "Khumbu",
-    duration: 14,
-    difficulty: "Challenging",
-    price: 1805, // $1,805 USD
-    rating: 4.8,
-    bestSeason: ["Spring", "Autumn"],
-    highlights: ["Kala Patthar", "Namche Bazaar", "Tengboche Monastery"]
-  },
-  {
-    id: 2,
-    title: "Annapurna Circuit",
-    region: "Annapurna",
-    duration: 12,
-    difficulty: "Moderate",
-    price: 1353, // $1,353 USD (matching Annapurna Circuit price)
-    rating: 4.9,
-    bestSeason: ["Spring", "Autumn"],
-    highlights: ["Thorong La Pass", "Manang", "Muktinath"]
-  },
-  // ... Add 43 more treks with similar structure
-  {
-    id: 45,
-    title: "Upper Mustang Trek",
-    region: "Mustang",
-    duration: 14,
-    difficulty: "Moderate",
-    price: 2105, // $2,105 USD
-    rating: 4.7,
-    bestSeason: ["Spring", "Autumn"],
-    highlights: ["Lo Manthang", "Kagbeni", "Ancient Caves"]
-  }
-];
 
 const AllTreks = () => {
   const location = useLocation();
-  const [filteredTreks, setFilteredTreks] = useState(allTrekData);
-  const [isLoading, setIsLoading] = useState(false);
+  const [activeTreks, setActiveTreks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
     region: '',
     difficulty: '',
     duration: '',
-    minPrice: '250',
+    minPrice: '',
     maxPrice: ''
   });
 
-  const regions = [...new Set(allTrekData.map(trek => trek.region))];
-  const difficulties = [...new Set(allTrekData.map(trek => trek.difficulty))];
-
-  // Mapping from URL slugs to actual region names
-  const regionMapping = {
-    'everest-region': 'Khumbu',
-    'annapurna-region': 'Annapurna',
-    'langtang-region': 'Langtang',
-    'manaslu-region': 'Manaslu',
-    'mustang-region': 'Mustang'
-  };
-
-  // Set initial filters from URL params
+  // Fetch treks from API
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const searchParam = queryParams.get('search') || '';
-    const regionParam = queryParams.get('region');
-    
-    const initialFilters = {
-      ...filters,
-      search: searchParam
-    };
+    fetchTreks();
+  }, [location.search]); // Re-fetch or re-filter when URL changes if we want to support URL params for initial load
 
-    if (regionParam) {
-      const mappedRegion = regionMapping[regionParam] || regionParam;
-      initialFilters.region = mappedRegion;
+  const fetchTreks = async (currentFilters = filters) => {
+    setIsLoading(true);
+    try {
+      // Map frontend filters to backend query params
+      const params = {};
+      if (currentFilters.region && currentFilters.region !== "All Regions") params.region = currentFilters.region;
+      if (currentFilters.difficulty && currentFilters.difficulty !== "All Levels") params.difficulty = currentFilters.difficulty;
+
+      if (currentFilters.minPrice) params.minPrice = currentFilters.minPrice;
+      if (currentFilters.maxPrice) params.maxPrice = currentFilters.maxPrice;
+
+      const res = await trekService.getAllTreks({ limit: 100 }); // Fetch enough
+
+      if (res.success) {
+        let result = res.data;
+
+        // Client-side filtering to match previous robust logic
+        if (currentFilters.search) {
+          const searchLower = currentFilters.search.toLowerCase();
+          result = result.filter(trek =>
+            trek.title.toLowerCase().includes(searchLower) ||
+            (trek.region && trek.region.toLowerCase().includes(searchLower))
+          );
+        }
+
+        if (currentFilters.region) {
+          result = result.filter(trek => trek.region === currentFilters.region);
+        }
+
+        if (currentFilters.difficulty) {
+          result = result.filter(trek => trek.difficulty === currentFilters.difficulty);
+        }
+
+        if (currentFilters.duration) {
+          const [min, max] = currentFilters.duration.split('-').map(Number);
+          result = result.filter(trek => {
+            if (max) return trek.duration >= min && trek.duration <= max;
+            return trek.duration >= min;
+          });
+        }
+
+        if (currentFilters.minPrice) {
+          result = result.filter(trek => trek.price >= parseInt(currentFilters.minPrice));
+        }
+
+        if (currentFilters.maxPrice) {
+          result = result.filter(trek => trek.price <= parseInt(currentFilters.maxPrice));
+        }
+
+        setActiveTreks(result);
+      }
+    } catch (error) {
+      console.error("Failed to fetch treks", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setFilters(initialFilters);
-    applyFilters(initialFilters);
-  }, [location.search]);
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
 
-    // Handle price inputs
+    // Logic for setting filters state (same as before)
     if (name === 'minPrice' || name === 'maxPrice') {
-      // Remove any non-digit characters and ensure it's not negative
       const numericValue = value.replace(/\D/g, '');
       if (numericValue === '') {
-        setFilters({ ...filters, [name]: '' });
+        setFilters(prev => {
+          const next = { ...prev, [name]: '' };
+          fetchTreks(next);
+          return next;
+        });
         return;
       }
-
-      // For minPrice, ensure it's at least 250
-      if (name === 'minPrice' && parseInt(numericValue, 10) < 250) {
-        setFilters({ ...filters, minPrice: '250' });
-        return;
-      }
-
-      // For maxPrice, ensure it's not negative
-      if (name === 'maxPrice' && numericValue.startsWith('-')) {
-        return;
-      }
-
-      setFilters({ ...filters, [name]: numericValue });
-      applyFilters({ ...filters, [name]: numericValue });
+      setFilters(prev => {
+        const next = { ...prev, [name]: numericValue };
+        fetchTreks(next);
+        return next;
+      });
       return;
     }
 
-    const newFilters = {
-      ...filters,
-      [name]: value
-    };
+    const newFilters = { ...filters, [name]: value };
     setFilters(newFilters);
-    applyFilters(newFilters);
-  };
-
-  const applyFilters = (filterValues) => {
-    setIsLoading(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      let result = allTrekData;
-
-    // Apply search filter first
-    if (filterValues.search) {
-      const searchLower = filterValues.search.toLowerCase();
-      result = result.filter(trek => 
-        trek.title.toLowerCase().includes(searchLower) || 
-        (trek.region && trek.region.toLowerCase().includes(searchLower)) ||
-        (trek.highlights && Array.isArray(trek.highlights) && 
-         trek.highlights.some(h => h && h.toLowerCase().includes(searchLower)))
-      );
-    }
-
-    if (filterValues.region) {
-      result = result.filter(trek => trek.region === filterValues.region);
-    }
-
-    if (filterValues.difficulty) {
-      result = result.filter(trek => trek.difficulty === filterValues.difficulty);
-    }
-
-    if (filterValues.duration) {
-      const [min, max] = filterValues.duration.split('-').map(Number);
-      result = result.filter(trek => {
-        if (max) return trek.duration >= min && trek.duration <= max;
-        return trek.duration >= min;
-      });
-    }
-
-    if (filterValues.minPrice) {
-      result = result.filter(trek => trek.price >= parseInt(filterValues.minPrice));
-    }
-
-    if (filterValues.maxPrice) {
-      result = result.filter(trek => trek.price <= parseInt(filterValues.maxPrice));
-    }
-
-      setFilteredTreks(result);
-      setIsLoading(false);
-    }, 500);
+    fetchTreks(newFilters);
   };
 
   const clearFilters = () => {
-    setIsLoading(true);
-    setFilters({
+    const resetFilters = {
       search: '',
       region: '',
       difficulty: '',
       duration: '',
       minPrice: '',
       maxPrice: ''
-    });
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      setFilteredTreks(allTrekData);
-      setIsLoading(false);
-    }, 300);
+    };
+    setFilters(resetFilters);
+    fetchTreks(resetFilters);
+  };
+
+  // Extract unique regions and difficulties from the fetched data (or use predefined lists)
+  const regions = ["Everest Region", "Annapurna Region", "Langtang Region", "Manaslu Region", "Mustang Region", "Other"];
+  const difficulties = ["Easy", "Moderate", "Challenging", "Strenuous"];
+
+  const getImageUrl = (images) => {
+    if (!images || !Array.isArray(images) || images.length === 0) return 'https://via.placeholder.com/400x300';
+    const image = images[0];
+    if (typeof image !== 'string') return 'https://via.placeholder.com/400x300';
+    if (image.startsWith('http')) return image;
+    return `http://localhost:5000/${image.replace(/\\/g, '/')}`;
   };
 
   return (
     <div className="all-treks-page">
       <div className="section-header">
         <h1 className="section-title">All Trekking Routes</h1>
-        <p className="section-subtitle">Discover 45+ amazing trekking routes across Nepal's majestic Himalayas</p>
+        <p className="section-subtitle">Discover amazing trekking routes across Nepal's majestic Himalayas</p>
       </div>
 
       <div className="treks-container">
@@ -242,7 +186,6 @@ const AllTreks = () => {
                   name="minPrice"
                   placeholder="Min"
                   value={filters.minPrice}
-                  min="250"
                   onChange={handleFilterChange}
                 />
                 <span>to</span>
@@ -251,70 +194,45 @@ const AllTreks = () => {
                   name="maxPrice"
                   placeholder="Max"
                   value={filters.maxPrice}
-                  min="0"
                   onChange={handleFilterChange}
                 />
               </div>
             </div>
 
-            <button
-              className="btn btn-outline"
-              onClick={clearFilters}
-            >
+            <button className="btn btn-outline" onClick={clearFilters}>
               <i className="fas fa-times"></i> Clear Filters
             </button>
-          </div>
-
-          <div className="trek-stats">
-            <h4><i className="fas fa-chart-bar"></i> Trek Statistics</h4>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <div className="stat-number">{allTrekData.length}</div>
-                <div className="stat-label">Total Treks</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-number">{regions.length}</div>
-                <div className="stat-label">Regions</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-number">{difficulties.length}</div>
-                <div className="stat-label">Difficulty Levels</div>
-              </div>
-            </div>
           </div>
         </div>
 
         <div className="treks-grid-container">
           <div className="treks-header">
-            <h3>Showing {filteredTreks.length} of {allTrekData.length} Treks</h3>
+            <h3>Showing {activeTreks.length} Treks</h3>
           </div>
 
           {isLoading ? (
             <div className="loading-container" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 0' }}>
               <div className="loading-spinner">
                 <i className="fas fa-mountain fa-spin" style={{ fontSize: '3rem', color: '#1e88e5', marginBottom: '1rem' }}></i>
-                <p>Finding your perfect trek...</p>
+                <p>Loading treks...</p>
               </div>
             </div>
-          ) : filteredTreks.length === 0 ? (
+          ) : activeTreks.length === 0 ? (
             <div className="no-results">
               <i className="fas fa-mountain text-muted-large mb-16"></i>
               <h3>No Treks Found</h3>
               <p>Try adjusting your filters to find more trekking options.</p>
-              <button
-                className="btn btn-accent"
-                onClick={clearFilters}
-              >
+              <button className="btn btn-accent" onClick={clearFilters}>
                 <i className="fas fa-filter"></i> Clear All Filters
               </button>
             </div>
           ) : (
             <div className="treks-grid">
-              {filteredTreks.map(trek => (
-                <div className="trek-card" key={trek.id}>
+              {activeTreks.map(trek => (
+                <div className="trek-card" key={trek._id}>
                   <div className="trek-image">
                     <img
-                      src={`https://images.unsplash.com/photo-${1500000000000 + trek.id}?q=80&w=400&auto=format&fit=crop`}
+                      src={getImageUrl(trek.gallery)}
                       alt={trek.title}
                     />
                     <div className="trek-badge">{trek.region}</div>
@@ -326,23 +244,17 @@ const AllTreks = () => {
                       <span><i className="fas fa-signal"></i> {trek.difficulty}</span>
                     </div>
                     <div className="trek-highlights">
-                      {trek.highlights.slice(0, 3).map((highlight, idx) => (
+                      {(trek.highlights || []).slice(0, 3).map((highlight, idx) => (
                         <span key={idx} className="highlight-tag">{highlight}</span>
                       ))}
                     </div>
                     <div className="trek-footer">
                       <div className="trek-price">{formatPrice(trek.price)}</div>
                       <div className="trek-actions">
-                        <Link
-                          to={`/trek/${trek.id}`}
-                          className="btn-trek-details"
-                        >
+                        <Link to={`/trek/${trek._id}`} className="btn-trek-details">
                           <i className="fas fa-info-circle"></i> Details
                         </Link>
-                        <Link
-                          to={`/booking?trek=${encodeURIComponent(trek.title)}`}
-                          className="btn-trek-book"
-                        >
+                        <Link to={`/booking?trek=${encodeURIComponent(trek.title)}`} className="btn-trek-book">
                           <i className="fas fa-calendar"></i> Book Now
                         </Link>
                       </div>

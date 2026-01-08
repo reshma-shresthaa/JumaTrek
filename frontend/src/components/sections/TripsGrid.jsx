@@ -1,55 +1,95 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { treksData } from '../../data/trekData'; // Ensure this import is correct based on project structure
+import { trekService } from '../../services/api';
+import { FaMapMarkerAlt, FaClock, FaStar, FaArrowRight } from 'react-icons/fa';
 import './TripsGrid.css';
 
 const TripsGrid = () => {
-  // Use data or fallback to kimkim-like dummy data for visual matching if needed
-  // But better to use real data from the project.
-  const featuredTrips = treksData && treksData.length > 0 ? treksData.slice(0, 6) : [
-    {
-      id: 1,
-      title: 'Discover Norway by Train & Boat - 10 Days',
-      image: 'https://images.unsplash.com/photo-1509356843151-3e7d96241e11?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80',
-      description: 'This relaxing summer itinerary checks off Norway\'s three biggest cities, traveling by train, ferry, and fjord cruise for a true Scandinavian adventure.',
-      duration: 10
-    },
-    {
-      id: 2,
-      title: 'Highlights of Italy: Venice, Florence, Rome - 14 Days',
-      image: 'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80',
-      description: 'Discover the sights and delights of Italy on this two-week highlights tour. Explore the floating city of Venice, the Renaissance jewel of Florence...',
-      duration: 14
-    },
-    {
-      id: 3,
-      title: 'Grand Morocco Tour: North to South - 10 Days',
-      image: 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80',
-      description: 'This 10-day itinerary features a perfect mix of culture, history, adventure, and relaxation. Explore imperial cities, mountain villages, desert landscapes...',
-      duration: 10
-    }
-  ];
+  const [featuredTrips, setFeaturedTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTreks = async () => {
+      try {
+        const res = await trekService.getFeaturedTreks();
+        if (res.success) {
+          setFeaturedTrips(res.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch featured treks', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTreks();
+  }, []);
+
+  const getImageUrl = (images) => {
+    if (!images || !Array.isArray(images) || images.length === 0) return 'https://via.placeholder.com/800x600?text=No+Image';
+    const image = images[0];
+    if (typeof image !== 'string') return 'https://via.placeholder.com/800x600?text=No+Image';
+    if (image.startsWith('http')) return image;
+    return `http://localhost:5000/${image.replace(/\\/g, '/')}`;
+  };
+
+  if (loading) {
+    return <div className="text-center py-12">Loading featured treks...</div>;
+  }
 
   return (
-    <section className="trips-section">
-      <div className="container">
-        <h2 className="section-title text-start">Featured Trips</h2>
-        <div className="trips-list">
+    <section className="treks-grid-section">
+      <div className="treks-grid-container">
+        <div className="section-header">
+          <h2 className="section-title">Featured Treks</h2>
+          <p className="section-subtitle">Discover our most popular trekking adventures in the Himalayas</p>
+        </div>
+
+        <div className="trips-grid">
           {featuredTrips.map((trip) => (
-            <Link to={`/trek/${trip.id}`} key={trip.id} className="trip-list-item">
-              <div className="trip-thumb">
-                <img src={trip.image} alt={trip.title} />
+            <div key={trip._id} className="trip-card">
+              <div className="trip-card__image">
+                <img src={getImageUrl(trip.gallery)} alt={trip.title} />
+                <div className="trip-card__badge">{trip.region}</div>
+                <div className="trip-card__overlay">
+                  <Link to={`/trek/${trip._id}`} className="trip-card__view-btn">
+                    View Details <FaArrowRight className="ml-2" />
+                  </Link>
+                </div>
               </div>
-              <div className="trip-info-block">
-                <h3 className="trip-item-title">{trip.title}</h3>
-                <p className="trip-item-desc">{trip.description}</p>
-                <span className="read-more">Read more...</span>
+              <div className="trip-card__content">
+                <div className="trip-card__header">
+                  <h3 className="trip-card__title">{trip.title}</h3>
+                  <div className="trip-card__meta">
+                    <span className="trip-card__duration">
+                      <FaClock className="mr-1" /> {trip.duration} days
+                    </span>
+                    <span className="trip-card__difficulty">
+                      {trip.difficulty}
+                    </span>
+                  </div>
+                </div>
+                {/* Use a short description or substring logic if description is long */}
+                <p className="trip-card__description">
+                  {trip.description ? (trip.description.length > 100 ? trip.description.substring(0, 100) + '...' : trip.description) : 'No description available.'}
+                </p>
+                <div className="trip-card__footer">
+                  <div className="trip-card__price">
+                    From <span>${trip.price}</span>
+                  </div>
+                </div>
+                <Link to={`/trek/${trip._id}`} className="trip-card__cta">
+                  Explore Trip
+                </Link>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <Link to="/all-treks" className="btn btn--outline">View all trips</Link>
+
+        <div className="text-center mt-12">
+          <Link to="/all-treks" className="btn btn-primary">
+            View All Treks
+          </Link>
         </div>
       </div>
     </section>

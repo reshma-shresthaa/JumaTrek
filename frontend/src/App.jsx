@@ -20,6 +20,7 @@ import GuidesPage from './pages/GuidesPage';
 import ContactPage from './pages/ContactPage';
 import BlogPage from './pages/BlogPage';
 import TrekQuiz from './pages/quiz/TrekQuiz';
+import GuideDetails from './pages/GuideDetails';
 
 // Admin components
 import AdminLogin from './pages/admin/Login';
@@ -110,6 +111,7 @@ function MainLayout() {
           <Route path="/destinations" element={<DestinationsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/guides" element={<GuidesPage />} />
+          <Route path="/guides/:id" element={<GuideDetails />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/booking" element={<Booking />} />

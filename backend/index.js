@@ -11,6 +11,7 @@ import wishlistRouter from './routes/WishlistRoute.js';
 import adminRouter from './routes/AdminRoute.js';
 import customTripRouter from "./routes/CustomTripRoute.js";
 import inquiryRouter from "./routes/InquiryRoute.js";
+import guideRouter from "./routes/GuideRoute.js";
 
 
 const PORT = process.env.PORT || 5000
@@ -23,6 +24,8 @@ app.use(cors({
     credentials: true
 }))
 
+app.use('/uploads', express.static('uploads'));
+
 
 app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
@@ -32,6 +35,8 @@ app.use("/api/wishlist", wishlistRouter)
 app.use("/api/admin", adminRouter)
 app.use("/api/custom-trips", customTripRouter)
 app.use("/api/inquiry", inquiryRouter)
+app.use("/api/guides", guideRouter)
+app.use("/api/listing", listingRouter)
 
 
 app.get("/", (req, res) => {

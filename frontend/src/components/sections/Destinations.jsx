@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './TripsGrid.css'; // Using the same styles as TripsGrid
+import { FaMountain, FaArrowRight } from 'react-icons/fa';
+import './Destinations.css';
 import abcImage from '../../assets/images/ABC.jpg';
 import manasluImage from '../../assets/images/man.jpg';
 
@@ -37,29 +38,44 @@ const Destinations = () => {
   ];
 
   return (
-    <section className="trips-section">
-      <div className="container">
-        <h2 className="section-title text-start">Popular Trekking Regions</h2>
-        <div className="trips-list">
+    <section className="destinations-section">
+      <div className="destinations-container">
+        <header className="destinations-header">
+          <h2 className="section-title">Explore Popular Trekking Regions</h2>
+          <p className="section-subtitle">Discover the most breathtaking trekking destinations in the Himalayas, each offering unique landscapes and unforgettable experiences.</p>
+        </header>
+        
+        <div className="destinations-grid">
           {destinations.map((dest) => (
-            <Link 
-              to={`/all-treks?region=${dest.slug}`} 
-              key={dest.id} 
-              className="trip-list-item"
-            >
-              <div className="trip-thumb">
+            <article key={dest.id} className="destination-card">
+              <div className="destination-image">
                 <img src={dest.image} alt={dest.name} />
+                <div className="destination-overlay">
+                  <Link to={`/all-treks?region=${dest.slug}`} className="explore-btn">
+                    Explore Region <FaArrowRight />
+                  </Link>
+                </div>
               </div>
-              <div className="trip-info-block">
-                <h3 className="trip-item-title">{dest.name}</h3>
-                <p className="trip-item-desc">{dest.description}</p>
-                <span className="read-more">Explore treks</span>
+              <div className="destination-content">
+                <h3 className="destination-name">{dest.name}</h3>
+                <p className="destination-description">{dest.description}</p>
+                <div className="destination-meta">
+                  <span className="destination-treks">
+                    <FaMountain /> Multiple Treks
+                  </span>
+                  <Link to={`/all-treks?region=${dest.slug}`} className="explore-btn">
+                    View Treks <FaArrowRight />
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <Link to="/all-treks" className="btn btn--outline">View all regions</Link>
+        
+        <div className="text-center">
+          <Link to="/all-treks" className="view-all-btn">
+            View All Trekking Regions
+          </Link>
         </div>
       </div>
     </section>

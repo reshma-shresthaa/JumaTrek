@@ -1,46 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { guideService } from '../../services/api';
 import './Specialists.css';
 
 const Specialists = ({ hideViewAllButton = false }) => {
-    const specialists = [
-        {
-            id: 1,
-            name: 'Guðmundur Óli Pálmason',
-            role: 'Local Specialist',
-            location: 'Iceland',
-            description: 'Born in Reykjavík, Iceland, and from a young age I was already travelling all over Iceland with my parents...',
-            active: '58 mins ago',
-            image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-        },
-        {
-            id: 2,
-            name: 'Olman Romero',
-            role: 'Local Specialist',
-            location: 'Costa Rica',
-            description: 'I was born in Turrialba, it is a region famous for hosting the Guayabo Archeological Monument...',
-            active: '4 hours ago',
-            image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-        },
-        {
-            id: 3,
-            name: 'Shona Zhang',
-            role: 'Local Specialist',
-            location: 'China',
-            description: 'With strong passion for traveling, I worked as an English-speaking guide for 10 years...',
-            active: '4 hours ago',
-            image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-        },
-        {
-            id: 4,
-            name: 'Holden Ketchum',
-            role: 'Local Specialist',
-            location: 'Costa Rica',
-            description: 'I have lived in Costa Rica for eight years and made it my home...',
-            active: '2 mins ago',
-            image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-        }
-    ];
+    const [specialists, setSpecialists] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchGuides = async () => {
+            try {
+                const res = await guideService.getAllGuides();
+                if (res.success) {
+                    setSpecialists(res.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch guides', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGuides();
+    }, []);
+
+    const getImageUrl = (photo) => {
+        if (!photo) return 'https://via.placeholder.com/200';
+        if (photo.startsWith('http')) return photo;
+        return `http://localhost:5000/${photo.replace(/\\/g, '/')}`;
+    };
+
+    if (loading) {
+        return <div className="container" style={{ textAlign: 'center', padding: '2rem' }}>Loading specialists...</div>;
+    }
 
     return (
         <section className="specialists-section">
@@ -52,19 +44,26 @@ const Specialists = ({ hideViewAllButton = false }) => {
 
                 <div className="specialists-grid">
                     {specialists.map(specialist => (
-                        <div key={specialist.id} className="specialist-card">
+                        <div key={specialist._id} className="specialist-card">
                             <div className="specialist-header">
-                                <div className="specialist-status">
-                                    <span className="status-dot"></span>
-                                    active {specialist.active}
-                                </div>
+                                {/* Status section removed */}
                             </div>
                             <div className="specialist-content">
-                                <img src={specialist.image} alt={specialist.name} className="specialist-image" />
+                                <img
+                                    src={getImageUrl(specialist.photo)}
+                                    alt={specialist.name}
+                                    className="specialist-image"
+                                />
                                 <h3 className="specialist-name">{specialist.name}</h3>
-                                <div className="specialist-role">{specialist.role}</div>
-                                <p className="specialist-desc">{specialist.description}</p>
-                                <button className="btn-link">read more...</button>
+                                <div className="specialist-role">
+                                    {specialist.specialization && specialist.specialization[0]
+                                        ? specialist.specialization[0]
+                                        : 'Local Specialist'}
+                                </div>
+                                <p className="specialist-desc">
+                                    {specialist.bio ? specialist.bio.substring(0, 100) + '...' : ''}
+                                </p>
+                                <Link to={`/guides/${specialist._id}`} className="btn-link">read more...</Link>
                             </div>
                         </div>
                     ))}

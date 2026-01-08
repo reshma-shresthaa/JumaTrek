@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Table, 
-  Button, 
-  Space, 
-  Tag, 
-  Input, 
-  Select, 
-  Card, 
-  Row, 
-  Col, 
-  Popconfirm, 
-  message, 
+import {
+  Table,
+  Button,
+  Space,
+  Tag,
+  Input,
+  Select,
+  Card,
+  Row,
+  Col,
+  Popconfirm,
+  message,
   Badge,
   Tooltip,
   Switch
 } from 'antd';
-import { 
-  PlusOutlined, 
-  SearchOutlined, 
-  EditOutlined, 
-  DeleteOutlined, 
+import {
+  PlusOutlined,
+  SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
   EyeOutlined,
   FilterOutlined,
   ReloadOutlined
@@ -62,14 +62,14 @@ const TreksList = () => {
       };
 
       const response = await adminService.getAllListings(params);
-      
+
       if (response.success) {
         // Apply client-side search filter if search is provided
         let filteredData = response.data;
-        
+
         if (filters.search) {
           const searchLower = filters.search.toLowerCase();
-          filteredData = response.data.filter(listing => 
+          filteredData = response.data.filter(listing =>
             listing.title.toLowerCase().includes(searchLower) ||
             listing.region.toLowerCase().includes(searchLower) ||
             listing.description.toLowerCase().includes(searchLower)
@@ -156,7 +156,7 @@ const TreksList = () => {
         if (difficulty === 'Easy') color = 'green';
         if (difficulty === 'Moderate') color = 'orange';
         if (difficulty === 'Challenging') color = 'red';
-        
+
         return <Tag color={color}>{difficulty}</Tag>;
       },
       sorter: (a, b) => a.difficulty.localeCompare(b.difficulty),
@@ -226,24 +226,21 @@ const TreksList = () => {
       </div>
 
       <Card className="mb-6">
-        <Row gutter={[16, 16]} className="mb-4">
-          <Col xs={24} md={8}>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+          <div className="w-full md:w-1/3">
             <Search
               placeholder="Search treks..."
               allowClear
-              enterButton={
-                <Button type="primary">
-                  <SearchOutlined />
-                </Button>
-              }
+              enterButton={<Button type="primary" icon={<SearchOutlined />} />}
               onSearch={handleSearch}
-              className="w-full"
+              size="large"
             />
-          </Col>
-          <Col xs={24} md={16} className="flex flex-wrap gap-2 justify-end">
+          </div>
+          <div className="flex flex-wrap gap-3 justify-end items-center w-full md:w-2/3">
             <Select
               placeholder="Filter by difficulty"
-              className="w-full md:w-40"
+              style={{ width: 160 }}
+              size="large"
               value={filters.difficulty}
               onChange={(value) => handleFilterChange('difficulty', value)}
               suffixIcon={<FilterOutlined />}
@@ -253,10 +250,11 @@ const TreksList = () => {
               <Option value="Moderate">Moderate</Option>
               <Option value="Challenging">Challenging</Option>
             </Select>
-            
+
             <Select
               placeholder="Filter by region"
-              className="w-full md:w-40"
+              style={{ width: 160 }}
+              size="large"
               value={filters.region}
               onChange={(value) => handleFilterChange('region', value)}
               suffixIcon={<FilterOutlined />}
@@ -268,10 +266,10 @@ const TreksList = () => {
               <Option value="Manaslu">Manaslu</Option>
               <Option value="Mustang">Mustang</Option>
             </Select>
-            
-            <Button 
-              type="default" 
-              icon={<ReloadOutlined />} 
+
+            <Button
+              size="large"
+              icon={<ReloadOutlined />}
               onClick={() => {
                 setFilters({
                   search: '',
@@ -282,16 +280,17 @@ const TreksList = () => {
             >
               Reset
             </Button>
-            
-            <Button 
-              type="primary" 
+
+            <Button
+              type="primary"
+              size="large"
               icon={<PlusOutlined />}
               onClick={() => navigate('/admin/treks/add')}
             >
               Add New Trek
             </Button>
-          </Col>
-        </Row>
+          </div>
+        </div>
 
         <Table
           columns={columns}

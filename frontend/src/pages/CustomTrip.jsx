@@ -492,12 +492,8 @@ const CustomTrip = () => {
       setLoading(true);
       
       try {
-        // Get form values
-        const values = await form.validateFields();
-        const tripData = { ...formData, ...values };
-        
-        // Save to database
-        await axios.post('/api/trips/custom', tripData, {
+        // Make the API call with authentication
+        const response = await axios.post(`${API_BASE}/api/custom-trips`, submissionData, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`

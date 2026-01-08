@@ -107,4 +107,50 @@ export const inquiryService = {
   },
 };
 
+export const guideService = {
+  async getAllGuides() {
+    try {
+      const response = await publicApi.get('/guides');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch guides';
+    }
+  },
+  async getGuideById(id) {
+    try {
+      const response = await publicApi.get(`/guides/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch guide details';
+    }
+  }
+};
+
+export const trekService = {
+  async getAllTreks(params = {}) {
+    try {
+      const response = await publicApi.get('/listing', { params });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch treks';
+    }
+  },
+  async getTrekById(id) {
+    try {
+      const response = await publicApi.get(`/listing/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch trek details';
+    }
+  },
+  async getFeaturedTreks() {
+    try {
+      const response = await publicApi.get('/listing?limit=6&sort=rating-desc');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch featured treks';
+    }
+  }
+};
+
 export default api;

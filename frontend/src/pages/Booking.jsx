@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { bookingService } from '../services/api';
-import { authService } from '../services/api';
+import { bookingService, trekService, authService } from '../services/api';
 import { toast } from 'react-toastify';
-import { trekData } from '../data/trekData';
-import { allTrekData } from './AllTreks';
-
 
 const Booking = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const queryParams = new URLSearchParams(location.search);
-  const trekFromUrl = queryParams.get('trek') || '';
+  const trekIdFromUrl = queryParams.get('trekId'); // Prefer ID if available
+  const trekTitleFromUrl = queryParams.get('trek');  // Fallback to title
 
-  const matchedTrek = allTrekData.find(
-    t => t.title === trekFromUrl
-  );
+  const [availableTreks, setAvailableTreks] = useState([]);
 
-   const [formData, setFormData] = useState({
-    trek: matchedTrek ? matchedTrek.id : '',
+  // Form state
+  const [formData, setFormData] = useState({
+    trek: '',
     name: '',
     email: '',
     phone: '',
@@ -31,18 +27,20 @@ const Booking = () => {
     agreeTerms: false
   });
 
-  const [selectedTrek, setSelectedTrek] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fetchingTreks, setFetchingTreks] = useState(true);
   const [error, setError] = useState('');
-  
-   useEffect(() => {
+
+  // Auth check
+  useEffect(() => {
     if (!authService.isAuthenticated()) {
       alert('Please login to book a trek.');
       navigate('/auth');
     }
   }, [navigate]);
 
-   useEffect(() => {
+  // Pre-fill user data
+  useEffect(() => {
     const user = authService.getCurrentUser();
     if (user) {
       setFormData(prev => ({
@@ -54,16 +52,39 @@ const Booking = () => {
     }
   }, []);
 
+  // Fetch treks for dropdown
   useEffect(() => {
-    if (!formData.trek) {
-      setSelectedTrek(null);
-      return;
-    }
-const trek = allTrekData.find(t => t.id === formData.trek);
-    setSelectedTrek(trek || null);
-  }, [formData.trek]);
+    const fetchTreks = async () => {
+      try {
+        const res = await trekService.getAllTreks({ limit: 100 });
+        if (res.success) {
+          setAvailableTreks(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to load treks for booking", err);
+        toast.error("Could not load trek options. You can still submit a custom request.");
+      } finally {
+        setFetchingTreks(false);
+      }
+    };
+    fetchTreks();
+  }, []);
 
- 
+  // Set selected trek from URL once availableTreks are loaded
+  useEffect(() => {
+    if (availableTreks.length > 0 && !formData.trek) {
+      let matched = null;
+      if (trekIdFromUrl) {
+        matched = availableTreks.find(t => t._id === trekIdFromUrl);
+      } else if (trekTitleFromUrl) {
+        matched = availableTreks.find(t => t.title === trekTitleFromUrl);
+      }
+
+      if (matched) {
+        setFormData(prev => ({ ...prev, trek: matched._id }));
+      }
+    }
+  }, [availableTreks, trekIdFromUrl, trekTitleFromUrl]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -115,45 +136,45 @@ const trek = allTrekData.find(t => t.id === formData.trek);
               <div className="form-row">
                 <div className="form-group">
                   <label>Full Name *</label>
-                  <input 
-                    type="text" 
-                    name="name" 
+                  <input
+                    type="text"
+                    name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
                 <div className="form-group">
                   <label>Email Address *</label>
-                  <input 
-                    type="email" 
-                    name="email" 
+                  <input
+                    type="email"
+                    name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Phone Number *</label>
-                  <input 
-                    type="tel" 
-                    name="phone" 
+                  <input
+                    type="tel"
+                    name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
                 <div className="form-group">
                   <label>Country *</label>
-                  <input 
-                    type="text" 
-                    name="country" 
+                  <input
+                    type="text"
+                    name="country"
                     value={formData.country}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                 </div>
               </div>
@@ -164,25 +185,26 @@ const trek = allTrekData.find(t => t.id === formData.trek);
               <div className="form-row">
                 <div className="form-group">
                   <label>Selected Trek *</label>
-                  <select 
-                    name="trek" 
+                  <select
+                    name="trek"
                     value={formData.trek}
                     onChange={handleChange}
                     required
+                    disabled={fetchingTreks}
                   >
-                    <option value="">Choose a trek</option>
-  {allTrekData.map(trek => (
-    <option key={trek.id} value={trek.id}>
-      {trek.title}
-    </option>
-  ))} 
+                    <option value="">{fetchingTreks ? "Loading treks..." : "Choose a trek"}</option>
+                    {availableTreks.map(trek => (
+                      <option key={trek._id} value={trek._id}>
+                        {trek.title}
+                      </option>
+                    ))}
                     <option value="Custom">Custom Trek (Contact us)</option>
                   </select>
                 </div>
                 <div className="form-group">
                   <label>Group Size *</label>
-                  <select 
-                    name="groupSize" 
+                  <select
+                    name="groupSize"
                     value={formData.groupSize}
                     onChange={handleChange}
                     required
@@ -195,15 +217,15 @@ const trek = allTrekData.find(t => t.id === formData.trek);
                   </select>
                 </div>
               </div>
-              
+
               <div className="form-group">
                 <label>Preferred Start Date *</label>
-                <input 
-                  type="date" 
-                  name="preferredDate" 
+                <input
+                  type="date"
+                  name="preferredDate"
                   value={formData.preferredDate}
                   onChange={handleChange}
-                  required 
+                  required
                 />
               </div>
             </div>
@@ -212,8 +234,8 @@ const trek = allTrekData.find(t => t.id === formData.trek);
               <h3><i className="fas fa-comment"></i> Additional Information</h3>
               <div className="form-group">
                 <label>Special Requests or Questions</label>
-                <textarea 
-                  name="message" 
+                <textarea
+                  name="message"
                   rows="4"
                   value={formData.message}
                   onChange={handleChange}
@@ -226,9 +248,9 @@ const trek = allTrekData.find(t => t.id === formData.trek);
               <h3><i className="fas fa-credit-card"></i> Payment Method</h3>
               <div className="payment-options">
                 <label className="payment-option">
-                  <input 
-                    type="radio" 
-                    name="paymentMethod" 
+                  <input
+                    type="radio"
+                    name="paymentMethod"
                     value="bank-transfer"
                     checked={formData.paymentMethod === 'bank-transfer'}
                     onChange={handleChange}
@@ -238,11 +260,11 @@ const trek = allTrekData.find(t => t.id === formData.trek);
                     <span>Secure international bank transfer</span>
                   </div>
                 </label>
-                
+
                 <label className="payment-option">
-                  <input 
-                    type="radio" 
-                    name="paymentMethod" 
+                  <input
+                    type="radio"
+                    name="paymentMethod"
                     value="credit-card"
                     checked={formData.paymentMethod === 'credit-card'}
                     onChange={handleChange}
@@ -252,11 +274,11 @@ const trek = allTrekData.find(t => t.id === formData.trek);
                     <span>Pay online with secure payment gateway</span>
                   </div>
                 </label>
-                
+
                 <label className="payment-option">
-                  <input 
-                    type="radio" 
-                    name="paymentMethod" 
+                  <input
+                    type="radio"
+                    name="paymentMethod"
                     value="paypal"
                     checked={formData.paymentMethod === 'paypal'}
                     onChange={handleChange}
@@ -272,12 +294,12 @@ const trek = allTrekData.find(t => t.id === formData.trek);
             <div className="form-section">
               <div className="terms-agreement">
                 <label>
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     name="agreeTerms"
                     checked={formData.agreeTerms}
                     onChange={handleChange}
-                    required 
+                    required
                   />
                   I agree to the <a href="#terms">Terms & Conditions</a> and <a href="#privacy">Privacy Policy</a> *
                 </label>
@@ -290,8 +312,8 @@ const trek = allTrekData.find(t => t.id === formData.trek);
             {error && <div className="error-message" style={{ color: 'red', marginBottom: '16px' }}>{error}</div>}
 
             <div className="form-actions">
-              <button type="submit" className="btn" style={{ padding: '16px 32px', fontSize: '18px' }}>
-                <i className="fas fa-paper-plane"></i> Submit Booking Request
+              <button type="submit" className="btn" style={{ padding: '16px 32px', fontSize: '18px' }} disabled={loading}>
+                <i className="fas fa-paper-plane"></i> {loading ? 'Submitting...' : 'Submit Booking Request'}
               </button>
               <p className="muted" style={{ marginTop: '16px' }}>
                 We'll send you a confirmation email with payment instructions within 24 hours.

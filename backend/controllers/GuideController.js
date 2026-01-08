@@ -35,6 +35,32 @@ export const getAllGuides = async (req, res) => {
     }
 };
 
+export const getGuideById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const guide = await Guide.findById(id);
+
+        if (!guide) {
+            return res.status(404).json({
+                success: false,
+                message: "Guide not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: guide,
+        });
+    } catch (error) {
+        console.error("Error fetching guide:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch guide",
+            error: error.message,
+        });
+    }
+};
+
 export const createGuide = async (req, res) => {
     try {
         const payload = { ...req.body };
@@ -149,4 +175,3 @@ export const deleteGuide = async (req, res) => {
         });
     }
 };
-

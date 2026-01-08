@@ -51,6 +51,7 @@ const GuidesList = () => {
         setFilteredGuides(filtered);
     };
 
+
     const handleDelete = async (id, name) => {
         try {
             await adminService.deleteGuide(id);
@@ -58,17 +59,6 @@ const GuidesList = () => {
             fetchGuides();
         } catch (error) {
             message.error(error || 'Failed to delete guide');
-        }
-    };
-
-    const handleStatusToggle = async (id, currentStatus) => {
-        try {
-            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            await adminService.updateGuide(id, { status: newStatus });
-            message.success(`Guide status updated to ${newStatus}`);
-            fetchGuides();
-        } catch (error) {
-            message.error(error || 'Failed to update guide status');
         }
     };
 
@@ -120,32 +110,14 @@ const GuidesList = () => {
             key: 'languages',
             render: (languages) => languages.join(', '),
         },
-        {
-            title: 'Rating',
-            dataIndex: 'rating',
-            key: 'rating',
-            sorter: (a, b) => a.rating - b.rating,
-            render: (rating) => `⭐ ${rating}`,
-        },
+
         {
             title: 'Total Trips',
             dataIndex: 'totalTrips',
             key: 'totalTrips',
             sorter: (a, b) => a.totalTrips - b.totalTrips,
         },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            render: (status, record) => (
-                <Switch
-                    checked={status === 'active'}
-                    onChange={() => handleStatusToggle(record._id, status)}
-                    checkedChildren="Active"
-                    unCheckedChildren="Inactive"
-                />
-            ),
-        },
+
         {
             title: 'Actions',
             key: 'actions',
@@ -154,7 +126,7 @@ const GuidesList = () => {
                     <Button
                         type="link"
                         icon={<EditOutlined />}
-                    onClick={() => navigate(`/admin/guides/edit/${record._id}`)}
+                        onClick={() => navigate(`/admin/guides/edit/${record._id}`)}
                     >
                         Edit
                     </Button>
@@ -196,10 +168,6 @@ const GuidesList = () => {
                         onChange={(e) => setSearchText(e.target.value)}
                         prefix={<SearchOutlined />}
                     />
-                    <Space>
-                        <Tag color="green">Active: {guides.filter(g => g.status === 'active').length}</Tag>
-                        <Tag color="gray">Inactive: {guides.filter(g => g.status === 'inactive').length}</Tag>
-                    </Space>
                 </Space>
 
                 <Table
