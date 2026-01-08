@@ -127,9 +127,10 @@ const TrekDetailAdmin = () => {
                             </Title>
                         </div>
 
-                        <Paragraph>
-                            {trek.description}
-                        </Paragraph>
+                        <div
+                            className="trek-description-content"
+                            dangerouslySetInnerHTML={{ __html: trek.description }}
+                        />
 
                         <Divider />
 
@@ -153,7 +154,7 @@ const TrekDetailAdmin = () => {
                                     <List.Item.Meta
                                         avatar={<Tag color="blue">Day {item.day}</Tag>}
                                         title={<Text strong>{item.title}</Text>}
-                                        description={item.description}
+                                        description={<div dangerouslySetInnerHTML={{ __html: item.description }} />}
                                     />
                                     <Space size="large" style={{ marginLeft: 50, fontSize: 12, color: '#888' }}>
                                         {item.maxAltitude && <span><EnvironmentOutlined /> Max Alt: {item.maxAltitude}m</span>}

@@ -599,6 +599,7 @@ const CustomTrip = () => {
           <ReviewSubmitStep
             formData={formData}
             onPrevious={prevStep}
+            onInputChange={handleInputChange}
             onSubmit={handleSubmit}
             loading={loading}
             popularTreks={popularTreks}

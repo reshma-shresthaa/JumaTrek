@@ -17,6 +17,7 @@ const extractUserIdFromHeader = (authorization) => {
 
 export const createCustomTrip = async (req, res) => {
     try {
+        console.log("Headers:", req.headers);
         const userId =
             req.userId ||
             extractUserIdFromHeader(req.headers.authorization);
@@ -52,6 +53,18 @@ export const createCustomTrip = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating custom trip:", error);
+
+        // Handle Mongoose validation errors specifically
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message);
+            console.error("Validation Errors:", messages);
+            return res.status(400).json({
+                success: false,
+                message: "Validation failed",
+                errors: messages,
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Failed to submit custom trip request",

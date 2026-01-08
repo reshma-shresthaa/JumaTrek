@@ -128,7 +128,10 @@ const TrekDetail = () => {
             <div className="overview-grid">
               <div className="overview-description">
                 <h3>About This Trek</h3>
-                <p>{trek.description}</p>
+                <div
+                  className="trek-description-content"
+                  dangerouslySetInnerHTML={{ __html: trek.description }}
+                />
 
                 <div className="info-grid">
                   <h4>OVERVIEW</h4>
@@ -210,7 +213,10 @@ const TrekDetail = () => {
                         <h4>Day {day.day}: {day.title}</h4>
                       </div>
                       <div className="day-content">
-                        <p className="day-description">{day.description}</p>
+                        <div
+                          className="day-description"
+                          dangerouslySetInnerHTML={{ __html: day.description }}
+                        />
                         <div className="day-details">
                           <div className="detail-row">
                             {day.maxAltitude && (

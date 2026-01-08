@@ -112,9 +112,10 @@ const TrekInformation = ({ destination }) => {
 
             <div className="trek-story-section" style={{ marginTop: '24px' }}>
                 <Title level={5}>The Journey</Title>
-                <Paragraph ellipsis={{ rows: 4, expandable: true, symbol: 'Read More' }}>
-                    {trek.description}
-                </Paragraph>
+                <div
+                    className="trek-description-content"
+                    dangerouslySetInnerHTML={{ __html: trek.description }}
+                />
             </div>
 
             <Divider style={{ margin: '16px 0' }} />
@@ -166,7 +167,11 @@ const TrekInformation = ({ destination }) => {
                                 key={day.day}
                             >
                                 <div style={{ paddingLeft: '8px' }}>
-                                    <Paragraph style={{ marginBottom: '8px', color: '#4a5568' }}>{day.description}</Paragraph>
+                                    <div
+                                        className="day-description"
+                                        style={{ marginBottom: '8px', color: '#4a5568' }}
+                                        dangerouslySetInnerHTML={{ __html: day.description }}
+                                    />
                                     <div className="itinerary-meta">
                                         {day.maxAltitude && <Tag style={{ marginBottom: '4px' }}>Alt: {day.maxAltitude}</Tag>}
                                         {day.accommodation && <Tag style={{ marginBottom: '4px' }}>Stay: {day.accommodation}</Tag>}

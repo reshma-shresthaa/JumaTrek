@@ -43,17 +43,14 @@ const AddTrek = () => {
   const [activeTab, setActiveTab] = useState('basic');
   const [featuredImage, setFeaturedImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [detailedDescription, setDetailedDescription] = useState('');
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-
       const formData = new FormData();
 
       formData.append('title', values.title);
-      const description = detailedDescription || values.detailedDescription || '';
-      formData.append('description', description);
+      formData.append('description', values.detailedDescription || '');
       formData.append('region', values.region);
       formData.append('price', values.price);
       formData.append('duration', values.duration);
@@ -88,16 +85,15 @@ const AddTrek = () => {
         });
       }
 
-      // Handle itinerary - convert to JSON string (will be parsed in backend)
+      // Handle itinerary - convert to JSON string
       if (values.itinerary && Array.isArray(values.itinerary)) {
-        // Clean up itinerary data - ensure all fields are properly formatted
         const cleanedItinerary = values.itinerary.map(item => ({
           day: Number(item.day) || 1,
           title: item.title || '',
           description: item.description || '',
           maxAltitude: item.maxAltitude?.toString() || '',
           accommodation: item.accommodation?.toString() || '',
-          meals: item.meals?.toString() || ''
+          meals: Array.isArray(item.meals) ? item.meals.join(', ') : item.meals?.toString() || ''
         }));
         formData.append('itinerary', JSON.stringify(cleanedItinerary));
       }
@@ -115,7 +111,7 @@ const AddTrek = () => {
         });
       }
 
-      // Handle featured image - add as first image in images array
+      // Handle featured image - add as first image
       if (featuredImage) {
         formData.append('images', featuredImage);
       }
@@ -125,13 +121,10 @@ const AddTrek = () => {
         galleryImages.forEach((file) => {
           if (file.originFileObj) {
             formData.append('images', file.originFileObj);
-          } else if (file instanceof File) {
-            formData.append('images', file);
           }
         });
       }
 
-      // Call the API
       const response = await adminService.createListing(formData);
 
       if (response.success) {
@@ -142,45 +135,20 @@ const AddTrek = () => {
       }
     } catch (error) {
       console.error('Error adding trek:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to add trek. Please try again.';
-      message.error(errorMessage);
+      message.error(error.response?.data?.message || error.message || 'Failed to add trek');
     } finally {
       setLoading(false);
     }
   };
 
   const handleFeaturedImageChange = (info) => {
-    if (info.file.status === 'uploading') {
-      return;
-    }
     if (info.file.status === 'done' || info.file.originFileObj) {
-      const file = info.file.originFileObj || info.file;
-      setFeaturedImage(file);
-      message.success(`${file.name} file selected`);
-    } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
+      setFeaturedImage(info.file.originFileObj || info.file);
     }
   };
 
   const handleGalleryChange = ({ fileList }) => {
-    // Ensure all files have originFileObj
-    const processedFileList = fileList.map(file => {
-      if (file.originFileObj) {
-        return file;
-      }
-      // If it's a new file, create proper structure
-      if (file instanceof File) {
-        return {
-          uid: file.uid || `-${Date.now()}`,
-          name: file.name,
-          status: 'done',
-          url: URL.createObjectURL(file),
-          originFileObj: file
-        };
-      }
-      return file;
-    });
-    setGalleryImages(processedFileList);
+    setGalleryImages(fileList);
   };
 
   const beforeUpload = (file) => {

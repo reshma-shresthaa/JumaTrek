@@ -71,7 +71,12 @@ const TripsGrid = () => {
                 </div>
                 {/* Use a short description or substring logic if description is long */}
                 <p className="trip-card__description">
-                  {trip.description ? (trip.description.length > 100 ? trip.description.substring(0, 100) + '...' : trip.description) : 'No description available.'}
+                  {trip.description
+                    ? (() => {
+                      const plainText = trip.description.replace(/<[^>]*>/g, '');
+                      return plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText;
+                    })()
+                    : 'No description available.'}
                 </p>
                 <div className="trip-card__footer">
                   <div className="trip-card__price">

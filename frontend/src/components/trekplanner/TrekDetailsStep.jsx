@@ -301,11 +301,14 @@ const TrekDetailsStep = ({ formData, onInputChange, popularTreks, destinations }
                       )}
                     </div>
 
-                    <p className="trek-description">
-                      {isCustomTrek
-                        ? 'We\'ll work with you to create a personalized trekking experience based on your preferences. Our experts will contact you to discuss the details and create a custom itinerary.'
-                        : currentTrek.description}
-                    </p>
+                    <div
+                      className="trek-description"
+                      dangerouslySetInnerHTML={{
+                        __html: isCustomTrek
+                          ? 'We\'ll work with you to create a personalized trekking experience based on your preferences. Our experts will contact you to discuss the details and create a custom itinerary.'
+                          : currentTrek.description
+                      }}
+                    />
 
                     <div className="trek-stats">
                       <div className="stat-item">
