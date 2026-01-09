@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/api';
 import AuthForm from '../components/auth/AuthForm';
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/';
 
   // Check if user is already logged in
   useEffect(() => {
@@ -18,7 +20,7 @@ const AuthPage = () => {
     window.dispatchEvent(new Event('authStateChange'));
     // Small delay to ensure state updates propagate
     setTimeout(() => {
-      navigate('/', { replace: true });
+      navigate(redirectPath, { replace: true });
     }, 100);
   };
 

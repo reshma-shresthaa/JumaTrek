@@ -17,6 +17,7 @@ import {
   CheckCircleOutlined, SmileOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
+import { authService } from '../services/api';
 
 const API_BASE = import.meta?.env?.VITE_API_BASE || 'http://localhost:5000';
 import './CustomTrip.css';
@@ -257,7 +258,12 @@ const CustomTrip = () => {
         const pendingTrip = localStorage.getItem('pendingCustomTrip');
         if (pendingTrip) {
           const tripData = JSON.parse(pendingTrip);
-          const { isAuthenticated } = checkAuth();
+
+          // Convert date strings back to dayjs objects
+          if (tripData.startDate) tripData.startDate = dayjs(tripData.startDate);
+          if (tripData.endDate) tripData.endDate = dayjs(tripData.endDate);
+
+          const isAuthenticated = authService.isAuthenticated();
 
           if (isAuthenticated && tripData.isSubmissionPending) {
             // User just logged in to complete submission
@@ -277,11 +283,22 @@ const CustomTrip = () => {
                 if (form) {
                   form.setFieldsValue(tripData);
                 }
+                setCurrentStep(5); // Go to review step
                 // Remove the pending flag but keep draft
                 const updatedDraft = { ...tripData, isSubmissionPending: false };
                 localStorage.setItem('pendingCustomTrip', JSON.stringify(updatedDraft));
               }
             });
+          } else if (isAuthenticated && tripData.isDraft) {
+            // User logged in and has a draft, just restore it
+            setFormData(tripData);
+            setHasPendingTrip(true);
+            if (form) {
+              form.setFieldsValue(tripData);
+            }
+            if (tripData.currentStep) {
+              setCurrentStep(tripData.currentStep);
+            }
           } else if (tripData.isDraft) {
             // Ask user if they want to continue with draft
             Modal.confirm({
@@ -291,6 +308,10 @@ const CustomTrip = () => {
               cancelText: 'Start New Trip',
               onOk() {
                 try {
+                  // Ensure dates are dayjs objects here too just in case
+                  if (tripData.startDate) tripData.startDate = dayjs(tripData.startDate);
+                  if (tripData.endDate) tripData.endDate = dayjs(tripData.endDate);
+
                   setFormData(tripData);
                   setHasPendingTrip(true);
                   if (form) {
@@ -536,6 +557,8 @@ const CustomTrip = () => {
           ...formData,
           ...formValues,
           isDraft: true,
+          isSubmissionPending: true,
+          currentStep: currentStep,
           lastSaved: new Date().toISOString()
         };
         localStorage.setItem('pendingCustomTrip', JSON.stringify(pendingTrip));
