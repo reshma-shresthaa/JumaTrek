@@ -46,9 +46,9 @@ const ReviewSubmitStep = ({
   fitnessLevels,
   accommodationTypes,
   budgetRanges,
-  onInputChange
+  onInputChange,
+  form
 }) => {
-  const [form] = Form.useForm();
 
   const getTrekName = (value) => {
     const list = destinations && destinations.length > 0 ? destinations : popularTreks;
@@ -72,6 +72,7 @@ const ReviewSubmitStep = ({
   };
 
   const getAccommodationType = (value) => {
+    if (!accommodationTypes) return value;
     const type = accommodationTypes.find(t => t.value === value);
     return type ? type.label : value;
   };
@@ -79,35 +80,6 @@ const ReviewSubmitStep = ({
   const getBudgetRange = (value) => {
     const range = budgetRanges.find(r => r.value === value);
     return range ? range.label.replace(/\([^)]+\)/g, '').trim() : value;
-  };
-
-  const handleSubmit = async (values) => {
-    try {
-      const finalData = {
-        ...formData,
-        contactInfo: {
-          ...(formData.contactInfo || {}),
-          ...(values.contactInfo || {}),
-          emergencyContact: {
-            ...(formData.contactInfo?.emergencyContact || {}),
-            ...(values.emergencyContact || {})
-          }
-        },
-        termsAgreed: values.termsAgreed || false,
-        specialRequests: values.specialRequests
-      };
-
-      // Call the parent's onSubmit handler with the form values
-      await onSubmit(finalData);
-    } catch (error) {
-      console.error('Form submission failed:', error);
-      if (error.errorFields) {
-        const errorMessages = error.errorFields.map(field => field.errors.join(', ')).join('\n');
-        message.error(errorMessages);
-      } else {
-        message.error(error.message || 'Failed to submit your request');
-      }
-    }
   };
 
   return (
@@ -120,188 +92,170 @@ const ReviewSubmitStep = ({
         </Text>
       </div>
 
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={{
-          contactInfo: {
-            name: formData.contactInfo?.name || '',
-            email: formData.contactInfo?.email || '',
-            phone: formData.contactInfo?.phone || '',
-            country: formData.contactInfo?.country || ''
-          },
-          emergencyContact: {
-            name: formData.contactInfo?.emergencyContact?.name || '',
-            relationship: formData.contactInfo?.emergencyContact?.relationship || '',
-            phone: formData.contactInfo?.emergencyContact?.phone || '',
-            email: formData.contactInfo?.emergencyContact?.email || ''
-          },
-          specialRequests: formData.specialRequests || '',
-          termsAgreed: formData.termsAgreed || false
-        }}
-      >
-        <Row gutter={[24, 16]}>
-          <Col xs={24} lg={16}>
-            <Collapse defaultActiveKey={['trek-details', 'contact-info']} className="mb-6" ghost>
-              <Panel
-                header={<span className="font-semibold text-lg">Trek Details</span>}
-                key="trek-details"
-              >
-                <div className="pl-6 bg-gray-50 p-4 rounded-lg">
-                  <Row gutter={[16, 16]}>
-                    <Col xs={24} md={12}>
-                      <div className="mb-2"><Text strong>Trek: </Text><Text>{getTrekName(formData.destination)}</Text></div>
-                      <div className="mb-2"><Text strong>Start Date: </Text><Text>{formData.startDate ? dayjs(formData.startDate).format('MMMM D, YYYY') : 'Not specified'}</Text></div>
-                      <div className="mb-2"><Text strong>Duration: </Text><Text>{formData.duration} days</Text></div>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <div className="mb-2"><Text strong>Group Size: </Text><Text>{formData.groupSize} person(s)</Text></div>
-                      <div className="mb-2"><Text strong>Group Type: </Text><Text>{getGroupType(formData.groupType)}</Text></div>
-                      <div className="mb-2"><Text strong>Budget: </Text><Text>{getBudgetRange(formData.budgetRange)}</Text></div>
-                    </Col>
-                  </Row>
-                </div>
-              </Panel>
-
-              <Panel
-                header={<span className="font-semibold text-lg">Accommodation & Services</span>}
-                key="services"
-                className="mt-4"
-              >
-                <div className="pl-6 bg-gray-50 p-4 rounded-lg">
-                  <Row gutter={[16, 16]}>
-                    <Col xs={24} md={12}>
-                      <div className="mb-2"><Text strong>Accommodation: </Text><Text>{getAccommodationType(formData.accommodation)}</Text></div>
-                      <div className="mb-2">
-                        <Text strong>Meals: </Text>
-                        {formData.mealPreferences?.map(m => <Tag key={m} color="orange">{m}</Tag>)}
-                      </div>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <div className="mb-2"><Checkbox checked={formData.guideRequired} disabled>Guide Required</Checkbox></div>
-                      <div className="mb-2"><Checkbox checked={formData.porterRequired} disabled>Porter Required</Checkbox></div>
-                    </Col>
-                  </Row>
-                </div>
-              </Panel>
-
-              <Panel
-                header={<span className="font-semibold text-lg">Contact Information</span>}
-                key="contact-info"
-                className="mt-4"
-              >
-                <div className="pl-6">
-                  <Row gutter={16}>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['contactInfo', 'name']} label="Full Name" rules={[{ required: true }]}>
-                        <Input prefix={<UserOutlined />} placeholder="Full Name" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['contactInfo', 'email']} label="Email" rules={[{ required: true, type: 'email' }]}>
-                        <Input prefix={<MailOutlined />} placeholder="Email Address" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={16}>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['contactInfo', 'phone']} label="Phone" rules={[{ required: true }]}>
-                        <Input prefix={<PhoneOutlined />} placeholder="Phone Number" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['contactInfo', 'country']} label="Country" rules={[{ required: true }]}>
-                        <Input prefix={<GlobalOutlined />} placeholder="Country" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Divider orientation="left">Emergency Contact</Divider>
-                  <Row gutter={16}>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['emergencyContact', 'name']} label="Name" rules={[{ required: true }]}>
-                        <Input placeholder="Emergency Contact Name" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['emergencyContact', 'relationship']} label="Relationship" rules={[{ required: true }]}>
-                        <Input placeholder="Relationship" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={16}>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['emergencyContact', 'phone']} label="Phone" rules={[{ required: true }]}>
-                        <Input placeholder="Emergency Phone" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item name={['emergencyContact', 'email']} label="Email" rules={[{ type: 'email' }]}>
-                        <Input placeholder="Emergency Email" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Form.Item name="specialRequests" label="Special Requests">
-                    <Input.TextArea rows={3} placeholder="Any other details..." onChange={(e) => onInputChange && onInputChange('specialRequests', e.target.value)} />
-                  </Form.Item>
-                </div>
-              </Panel>
-            </Collapse>
-
-            <Card className="mt-6 shadow-sm">
-              <Form.Item
-                name="termsAgreed"
-                valuePropName="checked"
-                rules={[{ validator: (_, value) => value ? Promise.resolve() : Promise.reject('You must agree to terms') }]}
-              >
-                <Checkbox>I agree to the Terms & Conditions and Privacy Policy</Checkbox>
-              </Form.Item>
-
-              <Alert
-                message="Your safety is our priority"
-                description="We ensure all our treks follow strict safety protocols and are led by certified professionals."
-                type="info"
-                showIcon
-                className="mb-4"
-              />
-
-              <div className="flex justify-between mt-8">
-                <Button onClick={onPrevious} disabled={loading} size="large">Back</Button>
-                <Button type="primary" htmlType="submit" loading={loading} icon={<CheckCircleOutlined />} size="large">
-                  Submit Request
-                </Button>
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs={24} lg={8}>
-            <Card title="Summary" className="sticky top-4 shadow-sm" bordered={false}>
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <div className="text-lg font-semibold text-center mb-2">{getTrekName(formData.destination)}</div>
-                  <div className="text-center text-gray-600 mb-3">{formData.duration} days • {formData.groupSize} {formData.groupSize > 1 ? 'People' : 'Person'}</div>
-                  <Divider className="my-2" />
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span>Start Date:</span><span className="font-medium">{formData.startDate ? dayjs(formData.startDate).format('MMM D, YYYY') : 'Not set'}</span></div>
-                    <div className="flex justify-between"><span>Difficulty:</span><span className="font-medium capitalize">{formData.difficulty || 'Moderate'}</span></div>
-                    <div className="flex justify-between"><span>Budget:</span><span className="font-medium">${formData.budgetAmount} / person</span></div>
+      <Row gutter={[24, 16]}>
+        <Col xs={24} lg={16}>
+          <Collapse
+            defaultActiveKey={['trek-details', 'contact-info']}
+            className="mb-6"
+            ghost
+            items={[
+              {
+                key: 'trek-details',
+                label: <span className="font-semibold text-lg">Trek Details</span>,
+                children: (
+                  <div className="pl-6 bg-gray-50 p-4 rounded-lg">
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} md={12}>
+                        <div className="mb-2"><Text strong>Trek: </Text><Text>{getTrekName(formData.destination)}</Text></div>
+                        <div className="mb-2"><Text strong>Start Date: </Text><Text>{formData.startDate ? dayjs(formData.startDate).format('MMMM D, YYYY') : 'Not specified'}</Text></div>
+                        <div className="mb-2"><Text strong>Duration: </Text><Text>{formData.duration} days</Text></div>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <div className="mb-2"><Text strong>Group Size: </Text><Text>{formData.groupSize} person(s)</Text></div>
+                        <div className="mb-2"><Text strong>Group Type: </Text><Text>{getGroupType(formData.groupType)}</Text></div>
+                        <div className="mb-2"><Text strong>Budget: </Text><Text>{getBudgetRange(formData.budgetRange)}</Text></div>
+                      </Col>
+                    </Row>
                   </div>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg text-sm">
-                  <div className="font-semibold mb-1">What's Next?</div>
-                  <ul className="pl-4 list-disc space-y-1 text-gray-600">
-                    <li>Our team reviews your request</li>
-                    <li>Expert advice on your itinerary</li>
-                    <li>Finalized quote within 24h</li>
-                  </ul>
+                )
+              },
+              {
+                key: 'services',
+                label: <span className="font-semibold text-lg">Accommodation & Services</span>,
+                children: (
+                  <div className="pl-6 bg-gray-50 p-4 rounded-lg">
+                    <Row gutter={[16, 16]}>
+                      <Col xs={24} md={12}>
+                        <div className="mb-2"><Text strong>Accommodation: </Text><Text>{getAccommodationType(formData.accommodation)}</Text></div>
+                        <div className="mb-2">
+                          <Text strong>Meals: </Text>
+                          {formData.mealPreferences?.map(m => <Tag key={m} color="orange">{m}</Tag>)}
+                        </div>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <div className="mb-2"><Checkbox checked={formData.guideRequired} disabled>Guide Required</Checkbox></div>
+                        <div className="mb-2"><Checkbox checked={formData.porterRequired} disabled>Porter Required</Checkbox></div>
+                      </Col>
+                    </Row>
+                  </div>
+                )
+              },
+              {
+                key: 'contact-info',
+                label: <span className="font-semibold text-lg">Contact Information</span>,
+                children: (
+                  <div className="pl-6">
+                    <Row gutter={16}>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['contactInfo', 'name']} label="Full Name" rules={[{ required: true }]}>
+                          <Input prefix={<UserOutlined />} placeholder="Full Name" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['contactInfo', 'email']} label="Email" rules={[{ required: true, type: 'email' }]}>
+                          <Input prefix={<MailOutlined />} placeholder="Email Address" />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['contactInfo', 'phone']} label="Phone" rules={[{ required: true }]}>
+                          <Input prefix={<PhoneOutlined />} placeholder="Phone Number" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['contactInfo', 'country']} label="Country" rules={[{ required: true }]}>
+                          <Input prefix={<GlobalOutlined />} placeholder="Country" />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Divider titlePlacement="start">Emergency Contact</Divider>
+                    <Row gutter={16}>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['emergencyContact', 'name']} label="Name" rules={[{ required: true }]}>
+                          <Input placeholder="Emergency Contact Name" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['emergencyContact', 'relationship']} label="Relationship" rules={[{ required: true }]}>
+                          <Input placeholder="Relationship" />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['emergencyContact', 'phone']} label="Phone" rules={[{ required: true }]}>
+                          <Input placeholder="Emergency Phone" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Form.Item name={['emergencyContact', 'email']} label="Email" rules={[{ type: 'email' }]}>
+                          <Input placeholder="Emergency Email" />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Form.Item name="specialRequests" label="Special Requests">
+                      <Input.TextArea rows={3} placeholder="Any other details..." onChange={(e) => onInputChange && onInputChange('specialRequests', e.target.value)} />
+                    </Form.Item>
+                  </div>
+                )
+              }
+            ]}
+          />
+
+          <Card className="mt-6 shadow-sm">
+            <Form.Item
+              name="termsAgreed"
+              valuePropName="checked"
+              rules={[{ validator: (_, value) => value ? Promise.resolve() : Promise.reject('You must agree to terms') }]}
+            >
+              <Checkbox>I agree to the Terms & Conditions and Privacy Policy</Checkbox>
+            </Form.Item>
+
+            <Alert
+              message="Your safety is our priority"
+              description="We ensure all our treks follow strict safety protocols and are led by certified professionals."
+              type="info"
+              showIcon
+              className="mb-4"
+            />
+
+            <div className="flex justify-between mt-8">
+              <Button onClick={onPrevious} disabled={loading} size="large">Back</Button>
+              <Button type="primary" onClick={() => form.submit()} loading={loading} icon={<CheckCircleOutlined />} size="large">
+                Submit Request
+              </Button>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card title="Summary" className="sticky top-4 shadow-sm" variant="borderless">
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="text-lg font-semibold text-center mb-2">{getTrekName(formData.destination)}</div>
+                <div className="text-center text-gray-600 mb-3">{formData.duration} days • {formData.groupSize} {formData.groupSize > 1 ? 'People' : 'Person'}</div>
+                <Divider className="my-2" />
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span>Start Date:</span><span className="font-medium">{formData.startDate ? dayjs(formData.startDate).format('MMM D, YYYY') : 'Not set'}</span></div>
+                  <div className="flex justify-between"><span>Difficulty:</span><span className="font-medium capitalize">{formData.difficulty || 'Moderate'}</span></div>
+                  <div className="flex justify-between"><span>Budget:</span><span className="font-medium">${formData.budgetAmount} / person</span></div>
                 </div>
               </div>
-            </Card>
-          </Col>
-        </Row>
-      </Form>
+              <div className="bg-green-50 p-4 rounded-lg text-sm">
+                <div className="font-semibold mb-1">What's Next?</div>
+                <ul className="pl-4 list-disc space-y-1 text-gray-600">
+                  <li>Our team reviews your request</li>
+                  <li>Expert advice on your itinerary</li>
+                  <li>Finalized quote within 24h</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };

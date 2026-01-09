@@ -36,6 +36,11 @@ const { Option } = Select;
 const { TextArea } = Input;
 const { Step } = Steps;
 
+const log = (step, data) => {
+  console.log(`[CustomTrip][${step}]`, data);
+};
+
+
 // Trek Difficulty Levels
 const difficultyLevels = [
   { value: 'easy', label: 'Easy', description: '3-5 hours of walking per day, gentle terrain, low altitude' },
@@ -311,8 +316,47 @@ const CustomTrip = () => {
     };
 
     loadDraft();
+  }, [form]);
 
-    // Clean up function to clear draft if component unmounts
+  // Auto-fill user information if logged in
+  useEffect(() => {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        const userData = user.user || user; // Handle different response structures
+
+        if (userData && (userData.name || userData.email || userData.contact)) {
+          console.log('[CustomTrip] Auto-filling user data');
+          const personalInfo = {
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.contact || '', // Server uses 'contact'
+            country: ''
+          };
+
+          setFormData(prev => ({
+            ...prev,
+            contactInfo: {
+              ...prev.contactInfo,
+              ...personalInfo
+            }
+          }));
+
+          if (form) {
+            form.setFieldsValue({
+              contactInfo: personalInfo
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing user data for auto-fill:', e);
+      }
+    }
+  }, [form]);
+
+  // Clean up function to clear draft if component unmounts
+  useEffect(() => {
     return () => {
       const pendingTrip = localStorage.getItem('pendingCustomTrip');
       if (pendingTrip) {
@@ -348,6 +392,7 @@ const CustomTrip = () => {
 
   // Handle form field changes
   const handleInputChange = (name, value) => {
+    log('INPUT_CHANGE', { name, value });
     // Update the form field value
     if (form) {
       form.setFieldsValue({ [name]: value });
@@ -360,6 +405,7 @@ const CustomTrip = () => {
       } else if (name === 'duration' && formData.startDate) {
         newFormData.endDate = calculateEndDate(formData.startDate, value);
       }
+      log('DATE_CALCULATION', newFormData);
       setFormData(newFormData);
     } else if (name === 'budgetRange') {
       const range = budgetRanges.find(r => r.value === value);
@@ -422,6 +468,8 @@ const CustomTrip = () => {
   }, []);
 
   const nextStep = async () => {
+    console.log('NEXT CLICKED');
+    console.log('Current Step:', currentStep);
     try {
       // Define fields to validate for each step
       const stepFields = {
@@ -477,8 +525,11 @@ const CustomTrip = () => {
   const handleSubmit = async (submitData) => {
     try {
       // Check if user is logged in
-      const token = localStorage.getItem('token');
-      if (!token) {
+      const userJson = localStorage.getItem('user');
+      const user = userJson ? JSON.parse(userJson) : null;
+      const token = user?.token || user?.accessToken; // Adjust based on your API structure
+
+      if (!user) {
         // Save form data to localStorage before redirecting
         const formValues = form.getFieldsValue(true);
         const pendingTrip = {
@@ -501,7 +552,19 @@ const CustomTrip = () => {
         // Get form values (use submitted data if available from ReviewSubmitStep)
         let tripData;
         if (submitData && typeof submitData === 'object' && !submitData.nativeEvent) {
-          tripData = submitData;
+          // Merge current formData state with the final form submission data
+          tripData = {
+            ...formData,
+            ...submitData,
+            contactInfo: {
+              ...(formData.contactInfo || {}),
+              ...(submitData.contactInfo || {}),
+              emergencyContact: {
+                ...(formData.contactInfo?.emergencyContact || {}),
+                ...(submitData.emergencyContact || {})
+              }
+            }
+          };
         } else {
           const values = await form.validateFields();
           tripData = { ...formData, ...values };
@@ -509,9 +572,10 @@ const CustomTrip = () => {
 
         // Save to database
         await axios.post(`${API_BASE}/api/custom-trips/`, tripData, {
+          withCredentials: true,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': token ? `Bearer ${token}` : undefined
           }
         });
 
@@ -520,11 +584,11 @@ const CustomTrip = () => {
 
         // Mark as submitted and show success message
         setFormSubmitted(true);
-        message.success('Your custom trip has been submitted successfully!');
+        toast.success('Your custom trip has been submitted successfully!');
 
         // Redirect to profile page after a short delay
         setTimeout(() => {
-          navigate('/profile');
+          navigate('/');
         }, 3000);
 
       } catch (apiError) {
@@ -536,6 +600,7 @@ const CustomTrip = () => {
           message.error('Your session has expired. Please sign in again.');
           navigate('/login', { state: { from: 'custom-trip' } });
         } else {
+          toast.error(errorMessage);
           message.error(errorMessage);
         }
       }
@@ -609,6 +674,7 @@ const CustomTrip = () => {
             fitnessLevels={fitnessLevels}
             accommodationTypes={accommodationTypes}
             budgetRanges={budgetRanges}
+            form={form}
           />
         );
       default:
@@ -616,6 +682,20 @@ const CustomTrip = () => {
     }
   };
 
+  // Update form values when formData changes
+  useEffect(() => {
+    if (form) {
+      form.setFieldsValue({
+        ...formData,
+        contactInfo: {
+          ...formData.contactInfo,
+          emergencyContact: {
+            ...(formData.contactInfo?.emergencyContact || {})
+          }
+        }
+      });
+    }
+  }, [formData, form]);
 
   if (formSubmitted) {
     return (
@@ -643,20 +723,6 @@ const CustomTrip = () => {
     );
   }
 
-  // Update form values when formData changes
-  useEffect(() => {
-    if (form) {
-      form.setFieldsValue({
-        ...formData,
-        contactInfo: {
-          ...formData.contactInfo,
-          emergencyContact: {
-            ...(formData.contactInfo?.emergencyContact || {})
-          }
-        }
-      });
-    }
-  }, [formData, form]);
 
   return (
     <div className="custom-trip-container">
@@ -690,6 +756,7 @@ const CustomTrip = () => {
             form={form}
             onFinish={currentStep === steps.length - 1 ? handleSubmit : nextStep}
             initialValues={formData}
+            preserve={true}
           >
             {renderStepContent()}
 

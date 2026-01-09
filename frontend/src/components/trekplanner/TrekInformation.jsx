@@ -23,7 +23,6 @@ import axios from 'axios';
 import './TrekInformation.css';
 
 const { Title, Text, Paragraph } = Typography;
-const { Panel } = Collapse;
 
 const API_BASE = import.meta?.env?.VITE_API_BASE || 'http://localhost:5000';
 
@@ -160,12 +159,13 @@ const TrekInformation = ({ destination }) => {
             {trek.itinerary && trek.itinerary.length > 0 && (
                 <div className="trek-itinerary-section" style={{ marginTop: '24px' }}>
                     <Title level={5}>Itinerary Details</Title>
-                    <Collapse ghost expandIconPosition="right">
-                        {trek.itinerary.map((day) => (
-                            <Panel
-                                header={<span style={{ fontWeight: 500 }}>Day {day.day}: {day.title}</span>}
-                                key={day.day}
-                            >
+                    <Collapse
+                        ghost
+                        expandIconPosition="right"
+                        items={trek.itinerary.map((day) => ({
+                            key: day.day,
+                            label: <span style={{ fontWeight: 500 }}>Day {day.day}: {day.title}</span>,
+                            children: (
                                 <div style={{ paddingLeft: '8px' }}>
                                     <div
                                         className="day-description"
@@ -178,9 +178,9 @@ const TrekInformation = ({ destination }) => {
                                         {day.meals && <Tag style={{ marginBottom: '4px' }}>Meals: {day.meals}</Tag>}
                                     </div>
                                 </div>
-                            </Panel>
-                        ))}
-                    </Collapse>
+                            )
+                        }))}
+                    />
                 </div>
             )}
         </div>
