@@ -153,4 +153,23 @@ export const trekService = {
   }
 };
 
+export const blogService = {
+  async getAllBlogs(params = {}) {
+    try {
+      const response = await publicApi.get('/blogs', { params });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch blogs';
+    }
+  },
+  async getBlogById(id) {
+    try {
+      const response = await publicApi.get(`/blogs/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch blog details';
+    }
+  }
+};
+
 export default api;

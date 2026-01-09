@@ -19,6 +19,7 @@ import AboutPage from './pages/AboutPage';
 import GuidesPage from './pages/GuidesPage';
 import ContactPage from './pages/ContactPage';
 import BlogPage from './pages/BlogPage';
+import BlogDetail from './pages/BlogDetail';
 import GuideDetails from './pages/GuideDetails';
 
 // Admin components
@@ -117,6 +118,7 @@ function MainLayout() {
           <Route path="/guides/:id" element={<GuideDetails />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/all-treks" element={<AllTreks />} />
           <Route path="/trek/:id" element={<TrekDetail />} />

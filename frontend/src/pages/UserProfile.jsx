@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/api';
+import { authService, bookingService } from '../services/api';
+import BookingDetailModal from '../components/BookingDetailModal';
 import './UserProfile.css';
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,12 +18,30 @@ const UserProfile = () => {
       navigate('/auth');
     } else {
       setUser(currentUser);
+      fetchUserBookings();
     }
   }, [navigate]);
 
-  if (!user) {
-    return <div className="loading">Loading...</div>;
-  }
+  const fetchUserBookings = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching user bookings...');
+      const response = await bookingService.getUserBookings();
+      console.log('Bookings response:', response);
+      if (response.success) {
+        console.log('Bookings found:', response.bookings);
+        setBookings(response.bookings || []);
+      } else {
+        console.warn('API response not successful:', response);
+        setBookings([]);
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getInitials = (name) => {
     return name
@@ -28,63 +51,94 @@ const UserProfile = () => {
       .slice(0, 2);
   };
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  const handleViewDetails = (booking) => {
+    setSelectedBooking(booking);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedBooking(null);
+  };
+
+  if (!user) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  const memberSinceDate = user.createdAt ? formatDate(user.createdAt) : 'N/A';
+
   return (
     <div className="user-profile-container">
-      <div className="profile-card">
-        <div className="profile-header">
-          <h1>My Profile</h1>
+      {/* User Profile Header */}
+      <div className="profile-header-card">
+        <div className="profile-user-info">
+          <div className="profile-avatar">
+            {getInitials(user.name)}
+          </div>
+          <div className="profile-user-details">
+            <h2>{user.name}</h2>
+            <p className="member-since">Member since {memberSinceDate}</p>
+          </div>
         </div>
 
-        <div className="profile-content">
-          <div className="profile-avatar-section">
-            <div className="profile-avatar">
-              {getInitials(user.name)}
-            </div>
+        <div className="profile-divider"></div>
+
+        <div className="profile-contact-info">
+          <div className="contact-item">
+            <label>EMAIL</label>
+            <p>{user.email}</p>
           </div>
-
-          <div className="profile-info">
-            <div className="info-group">
-              <label>Full Name</label>
-              <div className="info-value">{user.name}</div>
-            </div>
-
-            <div className="info-group">
-              <label>Email Address</label>
-              <div className="info-value">{user.email}</div>
-            </div>
-
-            <div className="info-group">
-              <label>Contact Number</label>
-              <div className="info-value">{user.contact}</div>
-            </div>
-
-            {user.role && (
-              <div className="info-group">
-                <label>Role</label>
-                <div className="info-value">{user.role}</div>
-              </div>
-            )}
-
-            {user._id && (
-              <div className="info-group">
-                <label>User ID</label>
-                <div className="info-value" style={{ fontSize: '12px', color: '#7f8c8d' }}>
-                  {user._id}
-                </div>
-              </div>
-            )}
+          <div className="contact-item">
+            <label>PHONE</label>
+            <p>{user.contact || 'Not provided'}</p>
           </div>
-
-          <div className="profile-actions">
-            <button 
-              className="btn btn-primary"
-              onClick={() => navigate('/')}
-            >
-              Back to Home
-            </button>
+          <div className="contact-item">
+            <label>LOCATION</label>
+            <p>{user.location || 'Not provided'}</p>
           </div>
         </div>
       </div>
+
+      {/* My Bookings Section */}
+      <div className="bookings-section">
+        <h3>My Bookings</h3>
+        {loading ? (
+          <div className="loading-message">Loading bookings...</div>
+        ) : bookings.length > 0 ? (
+          <div className="bookings-grid">
+            {bookings.map((booking) => (
+              <div key={booking._id} className="booking-card">
+                <h4>{booking.trekName}</h4>
+                <p className="booking-dates">
+                  Date: {formatDate(booking.preferredDate)}
+                </p>
+                <button 
+                  className="btn-view-details"
+                  onClick={() => handleViewDetails(booking)}
+                >
+                  View Details
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="no-bookings">No bookings yet</p>
+        )}
+      </div>
+
+      {/* Booking Detail Modal */}
+      {showModal && selectedBooking && (
+        <BookingDetailModal 
+          booking={selectedBooking} 
+          onClose={handleCloseModal}
+          formatDate={formatDate}
+        />
+      )}
     </div>
   );
 };
