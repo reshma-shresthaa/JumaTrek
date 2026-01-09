@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService, bookingService } from '../services/api';
+import { authService, adminService } from '../services/api';
 import BookingDetailModal from '../components/BookingDetailModal';
 import './UserProfile.css';
 
@@ -18,19 +18,57 @@ const UserProfile = () => {
       navigate('/auth');
     } else {
       setUser(currentUser);
-      fetchUserBookings();
     }
   }, [navigate]);
+
+  // Separate effect to fetch bookings when user is set
+  useEffect(() => {
+    if (user) {
+      fetchUserBookings();
+    }
+  }, [user]);
 
   const fetchUserBookings = async () => {
     try {
       setLoading(true);
-      console.log('Fetching user bookings...');
-      const response = await bookingService.getUserBookings();
-      console.log('Bookings response:', response);
-      if (response.success) {
-        console.log('Bookings found:', response.bookings);
-        setBookings(response.bookings || []);
+      console.log('Fetching all bookings from admin...');
+      console.log('Current user:', user);
+      const response = await adminService.getAllBookings();
+      console.log('Admin bookings response:', response);
+      
+      if (response.success && response.data) {
+        // Filter bookings for the current user
+        const userBookings = response.data.filter(booking => {
+          console.log('Checking booking:', booking);
+          console.log('Booking user ID:', booking.user?._id);
+          console.log('Current user ID:', user._id);
+          console.log('Booking email:', booking.email);
+          console.log('Current user email:', user.email);
+          
+          // Convert both IDs to strings for comparison
+          if (booking.user && booking.user._id) {
+            const bookingUserId = String(booking.user._id);
+            const currentUserId = String(user._id);
+            console.log('Comparing IDs - booking:', bookingUserId, 'current:', currentUserId);
+            if (bookingUserId === currentUserId) {
+              console.log('✓ Match by ID');
+              return true;
+            }
+          }
+          
+          // Fallback to email comparison
+          if (booking.email && user.email && booking.email.toLowerCase() === user.email.toLowerCase()) {
+            console.log('✓ Match by email');
+            return true;
+          }
+          
+          console.log('✗ No match');
+          return false;
+        });
+        
+        console.log('Filtered user bookings:', userBookings);
+        console.log('Total bookings found:', userBookings.length);
+        setBookings(userBookings || []);
       } else {
         console.warn('API response not successful:', response);
         setBookings([]);
@@ -113,7 +151,7 @@ const UserProfile = () => {
           <div className="bookings-grid">
             {bookings.map((booking) => (
               <div key={booking._id} className="booking-card">
-                <h4>{booking.trekName}</h4>
+                <h4>{booking.trek?.title || booking.trekName}</h4>
                 <p className="booking-dates">
                   Date: {formatDate(booking.preferredDate)}
                 </p>

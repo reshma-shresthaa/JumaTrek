@@ -172,4 +172,15 @@ export const blogService = {
   }
 };
 
+export const adminService = {
+  async getAllBookings() {
+    try {
+      const response = await publicApi.get('/admin/bookings');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch bookings';
+    }
+  }
+};
+
 export default api;

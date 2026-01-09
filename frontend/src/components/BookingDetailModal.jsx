@@ -30,7 +30,7 @@ const BookingDetailModal = ({ booking, onClose, formatDate }) => {
             <h3>Trek Information</h3>
             <div className="detail-item">
               <span className="detail-label">Trek Name</span>
-              <span className="detail-value">{booking.trekName}</span>
+              <span className="detail-value">{booking.trek?.title || booking.trekName}</span>
             </div>
             <div className="detail-item">
               <span className="detail-label">Status</span>
