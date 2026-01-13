@@ -222,9 +222,17 @@ const ReviewSubmitStep = ({
               className="mb-4"
             />
 
-            <div className="flex justify-between mt-8">
-              <Button onClick={onPrevious} disabled={loading} size="large">Back</Button>
-              <Button type="primary" onClick={() => form.submit()} loading={loading} icon={<CheckCircleOutlined />} size="large">
+            <div className="flex justify-end mt-8">
+              <Button onClick={onPrevious} disabled={loading} size="large" style={{ marginRight: '12px' }}>
+                Back
+              </Button>
+              <Button 
+                type="primary" 
+                onClick={() => form.submit()} 
+                loading={loading} 
+                icon={<CheckCircleOutlined />} 
+                size="large"
+              >
                 Submit Request
               </Button>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { trekService } from '../../services/api';
-import { FaMapMarkerAlt, FaClock, FaStar, FaArrowRight } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaClock, FaStar, FaArrowRight, FaMountain } from 'react-icons/fa';
 import './TripsGrid.css';
 
 const TripsGrid = () => {
@@ -46,7 +46,7 @@ const TripsGrid = () => {
         </div>
 
         <div className="trips-grid">
-          {featuredTrips.map((trip) => (
+          {featuredTrips.slice(0, 3).map((trip) => (
             <div key={trip._id} className="trip-card">
               <div className="trip-card__image">
                 <img src={getImageUrl(trip.gallery)} alt={trip.title} />
@@ -65,8 +65,13 @@ const TripsGrid = () => {
                       <FaClock className="mr-1" /> {trip.duration} days
                     </span>
                     <span className="trip-card__difficulty">
-                      {trip.difficulty}
+                      <FaMountain className="mr-1" /> {trip.difficulty}
                     </span>
+                    {trip.region && (
+                      <span className="trip-card__region">
+                        <FaMapMarkerAlt className="mr-1" /> {trip.region}
+                      </span>
+                    )}
                   </div>
                 </div>
                 {/* Use a short description or substring logic if description is long */}
@@ -78,13 +83,8 @@ const TripsGrid = () => {
                     })()
                     : 'No description available.'}
                 </p>
-                <div className="trip-card__footer">
-                  <div className="trip-card__price">
-                    From <span>${trip.price}</span>
-                  </div>
-                </div>
-                <Link to={`/trek/${trip._id}`} className="trip-card__cta">
-                  Explore Trip
+                <Link to={`/trek/${trip._id}`} className="explore-btn">
+                  Explore Trip <FaArrowRight className="ml-2" />
                 </Link>
               </div>
             </div>
@@ -92,7 +92,7 @@ const TripsGrid = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Link to="/all-treks" className="btn btn-primary">
+          <Link to="/all-treks" className="view-all-btn">
             View All Treks
           </Link>
         </div>

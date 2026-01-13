@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { trekService } from '../services/api';
+import { toast } from 'react-toastify';
 
 // Format price to USD with comma separators
 const formatPrice = (priceInUsd) => {
@@ -37,6 +38,165 @@ const TrekDetail = () => {
     if (!image || typeof image !== 'string') return 'https://via.placeholder.com/1200x600?text=No+Image';
     if (image.startsWith('http')) return image;
     return `http://localhost:5000/${image.replace(/\\/g, '/')}`;
+  };
+
+  const downloadItinerary = async () => {
+    if (!trek || !trek.itinerary) {
+      toast.error('Itinerary not available for download');
+      return;
+    }
+
+    try {
+      // Show loading state
+      toast.info('Preparing your itinerary...');
+      
+      // Dynamically import required libraries
+      const [jsPDF, html2canvas] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas')
+      ]);
+
+      // Create a temporary div to render the content
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '800px';
+      tempDiv.style.padding = '20px';
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.color = 'black';
+      
+      // Generate the HTML content for the PDF
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-US', options);
+      };
+
+      // Create itinerary HTML
+      const itineraryHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 760px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #2c3e50; font-size: 24px; margin-bottom: 5px;">${trek.title}</h1>
+            <p style="color: #7f8c8d; margin-top: 0; margin-bottom: 10px;">
+              ${trek.region} • ${trek.duration} Days • ${trek.difficulty}
+            </p>
+            <p style="color: #7f8c8d; font-size: 14px;">
+              Generated on: ${new Date().toLocaleDateString()}
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 30px;">
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 20px;">
+              Trek Overview
+            </h2>
+            <div style="display: flex; margin-bottom: 15px;">
+              <div style="flex: 1; padding-right: 15px;">
+                <p><strong>Duration:</strong> ${trek.duration} days</p>
+                <p><strong>Difficulty:</strong> ${trek.difficulty}</p>
+                <p><strong>Max Altitude:</strong> ${trek.maxAltitude}m</p>
+              </div>
+              <div style="flex: 1;">
+                <p><strong>Best Season:</strong> ${Array.isArray(trek.bestSeason) ? trek.bestSeason.join(', ') : trek.bestSeason || 'N/A'}</p>
+                <p><strong>Group Size:</strong> ${trek.groupSize || '2-12'}</p>
+                <p><strong>Start/End:</strong> ${trek.startPoint || 'N/A'} to ${trek.endPoint || 'N/A'}</p>
+              </div>
+            </div>
+            
+            ${trek.highlights && trek.highlights.length > 0 ? `
+              <div style="margin-top: 15px;">
+                <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 10px;">Highlights</h3>
+                <ul style="padding-left: 20px; margin: 0;">
+                  ${trek.highlights.map(highlight => 
+                    `<li style="margin-bottom: 5px;">${highlight}</li>`
+                  ).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+          
+          <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 20px; margin-bottom: 15px;">
+            Detailed Itinerary
+          </h2>
+          ${trek.itinerary.map((day, index) => `
+            <div style="margin-bottom: 20px; page-break-inside: avoid;">
+              <div style="background-color: #f8f9fa; padding: 10px 15px; border-left: 4px solid #3498db; margin-bottom: 10px;">
+                <h3 style="margin: 0; color: #2c3e50; font-size: 18px;">Day ${day.day}: ${day.title}</h3>
+              </div>
+              <div style="padding: 0 15px;">
+                <div style="margin-bottom: 10px;">
+                  ${day.description || 'No description available.'}
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; font-size: 14px;">
+                  ${day.maxAltitude ? `
+                    <div style="background-color: #f1f8ff; padding: 5px 10px; border-radius: 4px;">
+                      <strong>Max Altitude:</strong> ${day.maxAltitude}
+                    </div>
+                  ` : ''}
+                  ${day.accommodation ? `
+                    <div style="background-color: #f1f8ff; padding: 5px 10px; border-radius: 4px;">
+                      <strong>Accommodation:</strong> ${day.accommodation}
+                    </div>
+                  ` : ''}
+                  ${day.meals ? `
+                    <div style="background-color: #f1f8ff; padding: 5px 10px; border-radius: 4px;">
+                      <strong>Meals:</strong> ${day.meals}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+          
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #7f8c8d; font-style: italic; font-size: 14px;">
+            <p>Thank you for choosing JumaTrek for your adventure!</p>
+            <p>For any questions, please contact us at info@jumatrek.com or +977 01 5555 123</p>
+          </div>
+        </div>
+      `;
+
+      // Set the HTML content
+      tempDiv.innerHTML = itineraryHTML;
+
+      // Append to body and render
+      document.body.appendChild(tempDiv);
+      
+      // Use html2canvas to render the div as a canvas
+      const canvas = await html2canvas.default(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 190; // A4 width in mm (210 - 10mm margins on each side)
+      const pageHeight = 277; // A4 height in mm (297 - 10mm margins on top/bottom)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      
+      // Save the PDF
+      pdf.save(`JumaTrek-${trek.title.replace(/\s+/g, '-')}-Itinerary.pdf`);
+      
+      // Clean up
+      document.body.removeChild(tempDiv);
+      
+      toast.success('Itinerary downloaded successfully!');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error generating the itinerary. Please try again.');
+    }
   };
 
   if (loading) {
@@ -83,7 +243,11 @@ const TrekDetail = () => {
             <Link to={`/booking?trek=${encodeURIComponent(trek.title)}`} className="btn btn-primary">
               <i className="fas fa-calendar-check"></i> Book This Trek
             </Link>
-            <button className="btn btn-outline">
+            <button 
+              className="btn btn-outline"
+              onClick={downloadItinerary}
+              disabled={!trek}
+            >
               <i className="fas fa-download"></i> Download Itinerary
             </button>
           </div>
@@ -183,17 +347,6 @@ const TrekDetail = () => {
                   </div>
                 </div>
 
-                <div className="cta-box">
-                  <h4>Ready to Book?</h4>
-                  <p>Limited spots available for next season</p>
-                  <Link to={`/booking?trek=${encodeURIComponent(trek.title)}`} className="btn" style={{ width: '100%' }}>
-                    Check Availability
-                  </Link>
-                  <div className="contact-info">
-                    <p><i className="fas fa-phone"></i> Call us: +977 01 5555 123</p>
-                    <p><i className="fas fa-envelope"></i> trek@jumatrek.com</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -300,5 +453,161 @@ const TrekDetail = () => {
     </div>
   );
 };
+
+  const downloadItinerary = async () => {
+    if (!trek || !trek.itinerary) {
+      toast.error('Itinerary not available for download');
+      return;
+    }
+
+    try {
+      // Dynamically import required libraries
+      const [jsPDF, html2canvas] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas')
+      ]);
+
+      // Create a temporary div to render the content
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '800px';
+      tempDiv.style.padding = '20px';
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.color = 'black';
+      
+      // Generate the HTML content for the PDF
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-US', options);
+      };
+
+      // Create itinerary HTML
+      const itineraryHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 760px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #2c3e50; font-size: 24px; margin-bottom: 5px;">${trek.title}</h1>
+            <p style="color: #7f8c8d; margin-top: 0; margin-bottom: 10px;">
+              ${trek.region} • ${trek.duration} Days • ${trek.difficulty}
+            </p>
+            <p style="color: #7f8c8d; font-size: 14px;">
+              Generated on: ${new Date().toLocaleDateString()}
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 30px;">
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 20px;">
+              Trek Overview
+            </h2>
+            <div style="display: flex; margin-bottom: 15px;">
+              <div style="flex: 1; padding-right: 15px;">
+                <p><strong>Duration:</strong> ${trek.duration} days</p>
+                <p><strong>Difficulty:</strong> ${trek.difficulty}</p>
+                <p><strong>Max Altitude:</strong> ${trek.maxAltitude}m</p>
+              </div>
+              <div style="flex: 1;">
+                <p><strong>Best Season:</strong> ${Array.isArray(trek.bestSeason) ? trek.bestSeason.join(', ') : trek.bestSeason || 'N/A'}</p>
+                <p><strong>Group Size:</strong> ${trek.groupSize || '2-12'}</p>
+                <p><strong>Start/End:</strong> ${trek.startPoint || 'N/A'} to ${trek.endPoint || 'N/A'}</p>
+              </div>
+            </div>
+            
+            ${trek.highlights && trek.highlights.length > 0 ? `
+              <div style="margin-top: 15px;">
+                <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 10px;">Highlights</h3>
+                <ul style="padding-left: 20px; margin: 0;">
+                  ${trek.highlights.map(highlight => 
+                    `<li style="margin-bottom: 5px;">${highlight}</li>`
+                  ).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+          
+          <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 20px; margin-bottom: 15px;">
+            Detailed Itinerary
+          </h2>
+          ${trek.itinerary.map((day, index) => `
+            <div style="margin-bottom: 20px; page-break-inside: avoid;">
+              <div style="background-color: #f8f9fa; padding: 10px 15px; border-left: 4px solid #3498db; margin-bottom: 10px;">
+                <h3 style="margin: 0; color: #2c3e50; font-size: 18px;">Day ${day.day}: ${day.title}</h3>
+              </div>
+              <div style="padding: 0 15px;">
+                <div style="margin-bottom: 10px;">
+                  ${day.description || 'No description available.'}
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; font-size: 14px;">
+                  ${day.maxAltitude ? `
+                    <div style="background-color: #f1f8ff; padding: 5px 10px; border-radius: 4px;">
+                      <strong>Max Altitude:</strong> ${day.maxAltitude}
+                    </div>
+                  ` : ''}
+                  ${day.accommodation ? `
+                    <div style="background-color: #f1f8ff; padding: 5px 10px; border-radius: 4px;">
+                      <strong>Accommodation:</strong> ${day.accommodation}
+                    </div>
+                  ` : ''}
+                  ${day.meals ? `
+                    <div style="background-color: #f1f8ff; padding: 5px 10px; border-radius: 4px;">
+                      <strong>Meals:</strong> ${day.meals}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+          
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #7f8c8d; font-style: italic; font-size: 14px;">
+            <p>Thank you for choosing JumaTrek for your adventure!</p>
+            <p>For any questions, please contact us at info@jumatrek.com or +977 01 5555 123</p>
+          </div>
+        </div>
+      `;
+
+      // Set the HTML content
+      tempDiv.innerHTML = itineraryHTML;
+
+      // Append to body and render
+      document.body.appendChild(tempDiv);
+      
+      // Use html2canvas to render the div as a canvas
+      const canvas = await html2canvas.default(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 190; // A4 width in mm (210 - 10mm margins on each side)
+      const pageHeight = 277; // A4 height in mm (297 - 10mm margins on top/bottom)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      
+      // Save the PDF
+      pdf.save(`JumaTrek-${trek.title.replace(/\s+/g, '-')}-Itinerary.pdf`);
+      
+      // Clean up
+      document.body.removeChild(tempDiv);
+      
+      toast.success('Itinerary downloaded successfully!');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Error generating the itinerary. Please try again.');
+    }
+  };
 
 export default TrekDetail;

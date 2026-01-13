@@ -10,28 +10,28 @@ const Destinations = () => {
     { 
       id: 'everest',
       name: 'Everest Region', 
-      slug: 'everest-region', 
+      slug: 'everest', 
       image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
       description: 'Home to the world\'s highest peak, the Everest region offers breathtaking views of the Himalayas, Sherpa culture, and challenging trekking routes.'
     },
     { 
       id: 'annapurna',
-      name: 'Annapurna Circuit', 
-      slug: 'annapurna-circuit', 
+      name: 'Annapurna Region', 
+      slug: 'annapurna', 
       image: abcImage,
       description: 'One of the most diverse treks in Nepal, featuring lush valleys, high mountain passes, and stunning views of the Annapurna range.'
     },
     { 
       id: 'langtang',
-      name: 'Langtang Valley', 
-      slug: 'langtang-valley', 
+      name: 'Langtang Region', 
+      slug: 'langtang', 
       image: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
       description: 'A beautiful valley north of Kathmandu, known for its stunning landscapes, Tamang culture, and relatively less crowded trails.'
     },
     { 
       id: 'manaslu',
-      name: 'Manaslu Circuit', 
-      slug: 'manaslu-circuit', 
+      name: 'Manaslu Region', 
+      slug: 'manaslu', 
       image: manasluImage,
       description: 'A remote and less-traveled trek that circles Mount Manaslu, the eighth highest mountain in the world, offering pristine natural beauty.'
     },
@@ -46,12 +46,12 @@ const Destinations = () => {
         </header>
         
         <div className="destinations-grid">
-          {destinations.map((dest) => (
+          {destinations.slice(0, 3).map((dest) => (
             <article key={dest.id} className="destination-card">
               <div className="destination-image">
                 <img src={dest.image} alt={dest.name} />
                 <div className="destination-overlay">
-                  <Link to={`/all-treks?region=${dest.slug}`} className="explore-btn">
+                  <Link to={`/all-treks?region=${dest.slug}-region`} className="explore-btn">
                     Explore Region <FaArrowRight />
                   </Link>
                 </div>
@@ -63,7 +63,7 @@ const Destinations = () => {
                   <span className="destination-treks">
                     <FaMountain /> Multiple Treks
                   </span>
-                  <Link to={`/all-treks?region=${dest.slug}`} className="explore-btn">
+                  <Link to={`/all-treks?region=${dest.slug}-region`} className="explore-btn">
                     View Treks <FaArrowRight />
                   </Link>
                 </div>
@@ -73,7 +73,7 @@ const Destinations = () => {
         </div>
         
         <div className="text-center">
-          <Link to="/all-treks" className="view-all-btn">
+          <Link to="/destinations" className="view-all-btn">
             View All Trekking Regions
           </Link>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { guideService } from '../../services/api';
+import { FaArrowRight } from 'react-icons/fa';
 import './Specialists.css';
 
 const Specialists = ({ hideViewAllButton = false }) => {
@@ -63,15 +64,21 @@ const Specialists = ({ hideViewAllButton = false }) => {
                                 <p className="specialist-desc">
                                     {specialist.bio ? specialist.bio.substring(0, 100) + '...' : ''}
                                 </p>
-                                <Link to={`/guides/${specialist._id}`} className="btn-link">read more...</Link>
+                                <div className="mt-4">
+                                    <Link to={`/guides/${specialist._id}`} className="explore-btn">
+                                        View Profile <FaArrowRight className="ml-1" />
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {!hideViewAllButton && (
-                    <div className="specialists-cta">
-                        <Link to="/guides" className="btn btn--outline">See all local travel agents</Link>
+                    <div className="text-center mt-12">
+                        <Link to="/guides" className="view-all-btn">
+                            View All Travel Specialists
+                        </Link>
                     </div>
                 )}
             </div>

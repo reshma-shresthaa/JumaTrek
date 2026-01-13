@@ -102,7 +102,15 @@ const BudgetDatesStep = ({
 
       <Row gutter={[32, 24]}>
         <Col xs={24} md={12}>
-          <Card className="step-card" title="Budget Planning" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <Card className="step-card" title={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="card-icon-wrapper">
+                  <DollarOutlined />
+                </div>
+                <span>Budget Planning</span>
+              </div>
+            }>
             <Form.Item
               label="Select Your Budget Range (per person)"
               name="budgetRange"
@@ -175,12 +183,16 @@ const BudgetDatesStep = ({
                 </div>
               </div>
             )}
-          </Card>
-        </Col>
+            </Card>
 
-        <Col xs={24} md={12}>
-          <div style={{ position: 'sticky', top: '24px' }}>
-            <Card className="step-card" title="Tentative Dates" style={{ marginBottom: '24px' }}>
+            <Card className="step-card" title={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="card-icon-wrapper">
+                  <CalendarOutlined />
+                </div>
+                <span>Tentative Dates</span>
+              </div>
+            }>
               <Form.Item
                 label="Preferred Start Date"
                 name="startDate"
@@ -257,103 +269,73 @@ const BudgetDatesStep = ({
                   </div>
                 </div>
               )}
-
-              {formData.startDate && (
-                <div style={{
-                  marginTop: '16px',
-                  padding: '16px',
-                  backgroundColor: '#f0fdf4',
-                  borderRadius: '8px',
-                  border: '1px solid #86efac'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <InfoCircleOutlined style={{ marginRight: '8px', color: '#16a34a' }} />
-                    <Text strong>Seasonal Information:</Text>
-                  </div>
-                  <div style={{ marginTop: '8px' }}>
-                    <div style={{ fontWeight: 500 }}>{seasonInfo.icon} {seasonInfo.name} Season ({seasonInfo.months})</div>
-                    <div style={{ fontSize: '13px', marginTop: '4px' }}>{seasonInfo.description}</div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
-                      <div>
-                        <div style={{ fontWeight: 500, color: '#15803d' }}>Pros:</div>
-                        <div style={{ fontSize: '13px' }}>{seasonInfo.pros}</div>
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 500, color: '#b91c1c' }}>Considerations:</div>
-                        <div style={{ fontSize: '13px' }}>{seasonInfo.cons}</div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: '8px', fontSize: '13px' }}>
-                      <span style={{ fontWeight: 500 }}>Best for:</span> {seasonInfo.bestFor}
-                    </div>
-                  </div>
-                </div>
-              )}
             </Card>
+          </div>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <Card
               className="step-card"
               title="What's Included"
               style={{ height: '100%' }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <Typography.Title level={5} style={{ fontSize: '16px', marginBottom: '8px' }}>Included in Your Trek:</Typography.Title>
-                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#4b5563', fontSize: '14px', listStyle: 'disc' }}>
-                    <li>All necessary trekking permits and TIMS card</li>
-                    <li>Accommodation during the trek (twin sharing)</li>
-                    <li>All meals during the trek (breakfast, lunch, dinner)</li>
-                    <li>Experienced, English-speaking trekking guide</li>
-                    <li>Porter service (1 porter for 2 trekkers, max 15kg per trekker)</li>
-                    <li>All ground transportation as per itinerary</li>
-                    <li>First aid kit and oximeter</li>
-                    <li>All government taxes and service charges</li>
+                  <Typography.Title level={5} style={{ fontSize: '15px', marginBottom: '6px' }}>Included in Your Trek:</Typography.Title>
+                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#4b5563', fontSize: '12px', listStyle: 'disc' }}>
+                    <li>Trekking permits and TIMS card</li>
+                    <li>Accommodation (twin sharing)</li>
+                    <li>All meals (breakfast, lunch, dinner)</li>
+                    <li>English-speaking guide</li>
+                    <li>Porter service (1 for 2 trekkers, max 15kg)</li>
+                    <li>Ground transportation</li>
+                    <li>First aid kit</li>
+                    <li>Taxes and charges</li>
                   </ul>
                 </div>
 
                 <Divider style={{ margin: '8px 0' }} />
 
                 <div>
-                  <Typography.Title level={5} style={{ fontSize: '16px', marginBottom: '8px' }}>Not Included:</Typography.Title>
-                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#4b5563', fontSize: '14px', listStyle: 'disc' }}>
-                    <li>International flights to/from Nepal</li>
-                    <li>Nepal entry visa fee</li>
+                  <Typography.Title level={5} style={{ fontSize: '15px', marginBottom: '6px' }}>Not Included:</Typography.Title>
+                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#4b5563', fontSize: '12px', listStyle: 'disc' }}>
+                    <li>International flights</li>
+                    <li>Nepal visa fee</li>
                     <li>Travel insurance (mandatory)</li>
-                    <li>Personal expenses (alcoholic drinks, hot showers, battery charging, WiFi, etc.)</li>
+                    <li>Personal expenses</li>
                     <li>Tips for guide and porter</li>
-                    <li>Meals in Kathmandu (except breakfast)</li>
-                    <li>Any other expenses not mentioned in the included section</li>
+                    <li>Meals in Kathmandu</li>
+                    <li>Other unlisted expenses</li>
                   </ul>
                 </div>
 
                 <Divider style={{ margin: '8px 0' }} />
 
-                <div style={{ backgroundColor: '#fefce8', padding: '16px', borderRadius: '8px', border: '1px solid #fde047' }}>
-                  <Typography.Title level={5} style={{ fontSize: '15px', marginBottom: '8px', color: '#854d0e' }}>Payment & Cancellation Policy</Typography.Title>
-                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#854d0e', fontSize: '13px' }}>
-                    <li>20% deposit required to confirm booking</li>
-                    <li>Full payment due 30 days before departure</li>
-                    <li>Cancellation 60+ days before departure: Full refund</li>
-                    <li>Cancellation 30-60 days before: 50% refund</li>
-                    <li>Cancellation less than 30 days: No refund</li>
-                    <li>Unused services are non-refundable</li>
+                <div style={{ backgroundColor: '#fefce8', padding: '12px', borderRadius: '8px', border: '1px solid #fde047' }}>
+                  <Typography.Title level={5} style={{ fontSize: '14px', marginBottom: '6px', color: '#854d0e' }}>Payment & Cancellation</Typography.Title>
+                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#854d0e', fontSize: '12px' }}>
+                    <li>20% deposit to confirm</li>
+                    <li>Full payment 30 days before</li>
+                    <li>60+ days: Full refund</li>
+                    <li>30-60 days: 50% refund</li>
+                    <li>Less than 30 days: No refund</li>
                   </ul>
-                  <Text type="secondary" style={{ fontSize: '11px', marginTop: '8px', display: 'block', color: '#a16207' }}>
-                    * Cancellation policy is subject to change. Please verify before booking.
+                  <Text type="secondary" style={{ fontSize: '10px', marginTop: '6px', display: 'block', color: '#a16207' }}>
+                    * Policy subject to change. Verify before booking.
                   </Text>
                 </div>
 
-                <div style={{ backgroundColor: '#eff6ff', padding: '16px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                  <Typography.Title level={5} style={{ fontSize: '15px', marginBottom: '8px', color: '#1e40af' }}>Flexible Booking Options</Typography.Title>
-                  <Paragraph style={{ marginBottom: '4px', fontSize: '14px', color: '#1e40af' }}>
-                    We understand that plans can change. Ask us about our flexible booking options including:
+                <div style={{ backgroundColor: '#eff6ff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                  <Typography.Title level={5} style={{ fontSize: '14px', marginBottom: '4px', color: '#1e40af' }}>Flexible Booking</Typography.Title>
+                  <Paragraph style={{ marginBottom: '4px', fontSize: '12px', color: '#1e40af' }}>
+                    We offer flexible options:
                   </Paragraph>
-                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#1e40af', fontSize: '13px' }}>
-                    <li>Free date changes up to 30 days before departure</li>
-                    <li>Low deposit to secure your booking</li>
-                    <li>Payment plans available</li>
-                    <li>Group discounts for 4+ people</li>
+                  <ul style={{ paddingLeft: '20px', marginTop: '0', marginBottom: '0', color: '#1e40af', fontSize: '12px' }}>
+                    <li>Free date changes (30 days prior)</li>
+                    <li>Low deposit booking</li>
+                    <li>Payment plans</li>
+                    <li>Group discounts (4+ people)</li>
                   </ul>
                 </div>
               </div>

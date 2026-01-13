@@ -319,6 +319,78 @@
   margin-right: 12px;
 }
 
+/* Group Experience Step Specific Styles */
+.group-info-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.group-info-card .ant-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.experience-fitness-card {
+  height: 100%;
+}
+
+.safety-recommendations-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.safety-recommendations-card .ant-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.support-card {
+  padding: 16px 20px;
+  min-height: auto;
+}
+
+.support-card .ant-card-body {
+  padding: 12px 0;
+}
+
+/* Compact Alert Styling */
+.safety-recommendations-card .ant-alert {
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.safety-recommendations-card .ant-alert-message {
+  font-size: 14px;
+}
+
+.safety-recommendations-card .ant-alert-description {
+  font-size: 13px;
+}
+
+/* Reduce spacing in Safety Section Lists */
+.safety-recommendations-card ul {
+  margin-bottom: 12px;
+  padding-left: 20px;
+}
+
+.safety-recommendations-card li {
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Compact Info Boxes in Safety Section */
+.safety-recommendations-card > div > div > div {
+  margin-bottom: 12px;
+}
+
+.safety-recommendations-card .ant-typography {
+  margin-bottom: 0;
+}
+
 /* Detail Items Grid */
 .details-grid {
   display: grid;

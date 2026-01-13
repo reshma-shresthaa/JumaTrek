@@ -27,12 +27,14 @@ const AccommodationMealsStep = ({
           <Card
             className="step-card"
             title="Preferences"
+            style={{ height: '100%' }}
           >
             <Form.Item
               label="Preferred Accommodation Type"
               name="accommodation"
               tooltip={{ title: "Select where you would like to stay during the trek", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
               rules={[{ required: true, message: 'Please select accommodation type' }]}
+              style={{ marginBottom: '18px' }}
             >
               <Radio.Group
                 onChange={(e) => onInputChange('accommodation', e.target.value)}
@@ -72,6 +74,7 @@ const AccommodationMealsStep = ({
               name="mealPreferences"
               tooltip={{ title: "Select your dietary preferences", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
               rules={[{ required: true, message: 'Please select at least one preference' }]}
+              style={{ marginBottom: '18px' }}
             >
               <Checkbox.Group
                 options={mealPreferences}
@@ -111,23 +114,21 @@ const AccommodationMealsStep = ({
             title="Accommodation Details"
             style={{ height: '100%' }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {formData.accommodation === 'teahouse' && (
                 <>
-                  <Text strong style={{ fontSize: '16px' }}>Tea House Trekking</Text>
-                  <Paragraph style={{ color: '#4b5563' }}>
-                    Tea houses are simple lodges along the trekking routes that provide basic accommodation and meals.
-                    Rooms are typically twin-share with shared bathroom facilities. Most tea houses have a common dining
-                    area with a stove for warmth in the evenings.
+                  <Text strong style={{ fontSize: '15px' }}>Tea House Trekking</Text>
+                  <Paragraph style={{ color: '#4b5563', marginBottom: '8px', fontSize: '13px', lineHeight: 1.5 }}>
+                    Tea houses are simple lodges along trekking routes that provide basic accommodation and meals. Rooms are typically twin-share with shared bathroom facilities.
                   </Paragraph>
-                  <div style={{ backgroundColor: '#fef3c7', padding: '16px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
-                    <Text strong style={{ color: '#d97706' }}>What's Included:</Text>
-                    <ul style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: 0, color: '#4b5563' }}>
+                  <div style={{ backgroundColor: '#fef3c7', padding: '12px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
+                    <Text strong style={{ color: '#d97706', fontSize: '13px' }}>What's Included:</Text>
+                    <ul style={{ paddingLeft: '18px', marginTop: '6px', marginBottom: 0, color: '#4b5563', fontSize: '12px' }}>
                       <li>Basic private rooms (twin or double)</li>
                       <li>Common dining area</li>
-                      <li>Hot showers (usually available for a small fee)</li>
-                      <li>Charging facilities (may require payment)</li>
-                      <li>WiFi (available in some locations for a fee)</li>
+                      <li>Hot showers (small fee)</li>
+                      <li>Charging facilities (fee)</li>
+                      <li>WiFi (where available, fee)</li>
                     </ul>
                   </div>
                 </>
@@ -135,47 +136,46 @@ const AccommodationMealsStep = ({
 
               {formData.accommodation === 'camping' && (
                 <>
-                  <Text strong style={{ fontSize: '16px' }}>Camping Trek</Text>
-                  <Paragraph style={{ color: '#4b5563' }}>
-                    On a camping trek, our staff will set up tents at designated campsites. This option provides more
-                    flexibility in terms of route and schedule, and is the only option for some remote areas.
+                  <Text strong style={{ fontSize: '15px' }}>Camping Trek</Text>
+                  <Paragraph style={{ color: '#4b5563', marginBottom: '8px', fontSize: '13px', lineHeight: 1.5 }}>
+                    Our staff will set up tents at designated campsites. This provides flexibility in route and schedule, especially in remote areas.
                   </Paragraph>
-                  <div style={{ backgroundColor: '#e0f2fe', padding: '16px', borderRadius: '8px', border: '1px solid #7dd3fc' }}>
-                    <Text strong style={{ color: '#0284c7' }}>What's Included:</Text>
-                    <ul style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: 0, color: '#4b5563' }}>
+                  <div style={{ backgroundColor: '#e0f2fe', padding: '12px', borderRadius: '8px', border: '1px solid #7dd3fc' }}>
+                    <Text strong style={{ color: '#0284c7', fontSize: '13px' }}>What's Included:</Text>
+                    <ul style={{ paddingLeft: '18px', marginTop: '6px', marginBottom: 0, color: '#4b5563', fontSize: '12px' }}>
                       <li>Quality two-person tents</li>
                       <li>Insulated sleeping mats</li>
-                      <li>Dining tent with tables and chairs</li>
-                      <li>Kitchen tent with full kitchen crew</li>
+                      <li>Dining tent with tables</li>
+                      <li>Kitchen tent with full crew</li>
                       <li>Toilet tent</li>
                     </ul>
                   </div>
                 </>
               )}
 
-              <Divider style={{ margin: '16px 0' }} />
+              <Divider style={{ margin: '12px 0' }} />
 
               <div>
-                <Text strong style={{ fontSize: '16px', display: 'block', marginBottom: '8px' }}>Meal Information</Text>
-                <Paragraph style={{ color: '#4b5563', marginBottom: '16px' }}>
+                <Text strong style={{ fontSize: '15px', display: 'block', marginBottom: '6px' }}>Meal Information</Text>
+                <Paragraph style={{ color: '#4b5563', marginBottom: '12px', fontSize: '12px', lineHeight: 1.5 }}>
                   {formData.mealPreferences?.includes('vegetarian') && (
-                    <>Vegetarian options are widely available on all treks.<br /></>
+                    <>Vegetarian options available on all treks.<br /></>
                   )}
                   {formData.mealPreferences?.includes('vegan') && (
-                    <>Vegan options are available but may be limited in remote areas. Please inform us in advance.<br /></>
+                    <>Vegan options available (limited in remote areas).<br /></>
                   )}
                   {formData.mealPreferences?.includes('gluten_free') && (
-                    <>Gluten-free options are limited in remote areas. We'll do our best to accommodate your needs.<br /></>
+                    <>Gluten-free options limited. We'll accommodate when possible.<br /></>
                   )}
                 </Paragraph>
 
-                <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-                  <Text strong>Typical Meals:</Text>
-                  <ul style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: 0, color: '#4b5563' }}>
-                    <li><strong>Breakfast:</strong> Porridge, eggs, toast, pancakes, tea/coffee</li>
-                    <li><strong>Lunch:</strong> Dal bhat (rice with lentil soup and vegetables), noodles, pasta</li>
-                    <li><strong>Dinner:</strong> Soup, main course with rice/pasta, dessert</li>
-                    <li><strong>Snacks:</strong> Biscuits, chocolate, fresh fruit (when available)</li>
+                <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px' }}>
+                  <Text strong style={{ fontSize: '13px' }}>Typical Meals:</Text>
+                  <ul style={{ paddingLeft: '18px', marginTop: '6px', marginBottom: 0, color: '#4b5563', fontSize: '12px' }}>
+                    <li><strong>Breakfast:</strong> Porridge, eggs, toast, tea/coffee</li>
+                    <li><strong>Lunch:</strong> Dal bhat, noodles, pasta</li>
+                    <li><strong>Dinner:</strong> Soup, main course, dessert</li>
+                    <li><strong>Snacks:</strong> Biscuits, chocolate, fruit</li>
                   </ul>
                 </div>
               </div>

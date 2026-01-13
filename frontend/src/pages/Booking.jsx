@@ -257,35 +257,8 @@ const Booking = () => {
                   />
                   <div className="payment-details">
                     <strong>Bank Transfer</strong>
-                    <span>Secure international bank transfer</span>
-                  </div>
-                </label>
-
-                <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="credit-card"
-                    checked={formData.paymentMethod === 'credit-card'}
-                    onChange={handleChange}
-                  />
-                  <div className="payment-details">
-                    <strong>Credit Card</strong>
-                    <span>Pay online with secure payment gateway</span>
-                  </div>
-                </label>
-
-                <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="paypal"
-                    checked={formData.paymentMethod === 'paypal'}
-                    onChange={handleChange}
-                  />
-                  <div className="payment-details">
-                    <strong>PayPal</strong>
-                    <span>Secure payment through PayPal</span>
+                    <p>Account details will be provided after booking confirmation</p>
+                    <p>Please note: Bank transfer is the only accepted payment method at this time</p>
                   </div>
                 </label>
               </div>
@@ -301,7 +274,7 @@ const Booking = () => {
                     onChange={handleChange}
                     required
                   />
-                  I agree to the <a href="#terms">Terms & Conditions</a> and <a href="#privacy">Privacy Policy</a> *
+                  I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms & Conditions</a> and <a href="/terms" target="_blank" rel="noopener noreferrer">Privacy Policy</a> *
                 </label>
                 <p className="muted" style={{ fontSize: '14px', marginTop: '8px' }}>
                   A 30% deposit is required to confirm your booking. Full payment is due 60 days before departure.
@@ -345,24 +318,6 @@ const Booking = () => {
             <button className="btn" style={{ width: '100%', marginTop: '16px', background: 'var(--accent)' }}>
               <i className="fas fa-whatsapp"></i> Chat on WhatsApp
             </button>
-          </div>
-
-          <div className="sidebar-card">
-            <h4><i className="fas fa-file-pdf"></i> Important Documents</h4>
-            <div className="document-links">
-              <a href="#" className="document-link">
-                <i className="fas fa-download"></i> Trekking Checklist
-              </a>
-              <a href="#" className="document-link">
-                <i className="fas fa-download"></i> Terms & Conditions
-              </a>
-              <a href="#" className="document-link">
-                <i className="fas fa-download"></i> Insurance Information
-              </a>
-              <a href="#" className="document-link">
-                <i className="fas fa-download"></i> Visa Requirements
-              </a>
-            </div>
           </div>
         </div>
       </div>

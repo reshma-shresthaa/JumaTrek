@@ -20,10 +20,41 @@ const AllTreks = () => {
     maxPrice: ''
   });
 
+  // Update filters when URL search params change
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const searchQuery = searchParams.get('search');
+    const regionQuery = searchParams.get('region');
+    
+    const updatedFilters = { ...filters };
+    
+    if (searchQuery) {
+      updatedFilters.search = searchQuery;
+    } else {
+      updatedFilters.search = '';
+    }
+    
+    if (regionQuery) {
+      // Convert URL slug to proper region name if needed
+      const regionName = regionQuery
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+        .replace('Region', '')
+        .trim() + ' Region';
+      
+      updatedFilters.region = regionName;
+    } else {
+      updatedFilters.region = '';
+    }
+    
+    setFilters(updatedFilters);
+  }, [location.search]);
+
   // Fetch treks from API
   useEffect(() => {
     fetchTreks();
-  }, [location.search]); // Re-fetch or re-filter when URL changes if we want to support URL params for initial load
+  }, [filters]); // Re-fetch when filters change
 
   const fetchTreks = async (currentFilters = filters) => {
     setIsLoading(true);
@@ -242,6 +273,7 @@ const AllTreks = () => {
                     <div className="trek-meta">
                       <span><i className="fas fa-calendar-alt"></i> {trek.duration} days</span>
                       <span><i className="fas fa-signal"></i> {trek.difficulty}</span>
+                      <span><i className="fas fa-map-marker-alt"></i> {trek.region}</span>
                     </div>
                     <div className="trek-highlights">
                       {(trek.highlights || []).slice(0, 3).map((highlight, idx) => (

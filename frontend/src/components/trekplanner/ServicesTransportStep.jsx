@@ -24,7 +24,15 @@ const ServicesTransportStep = ({
 
       <Row gutter={[32, 24]}>
         <Col xs={24} md={12}>
-          <Card className="step-card" title="Guides & Porters" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <Card className="step-card" title={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="card-icon-wrapper">
+                  <SafetyOutlined />
+                </div>
+                <span>Guides & Porters</span>
+              </div>
+            }>
             <Form.Item
               name="guideRequired"
               valuePropName="checked"
@@ -101,13 +109,16 @@ const ServicesTransportStep = ({
                 </Text>
               </div>
             )}
-          </Card>
+            </Card>
 
-        </Col>
-
-        <Col xs={24} md={12}>
-          <div style={{ position: 'sticky', top: '24px' }}>
-            <Card className="step-card" title="Transportation" style={{ marginBottom: '24px' }}>
+            <Card className="step-card" title={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="card-icon-wrapper">
+                  <CarOutlined />
+                </div>
+                <span>Transportation</span>
+              </div>
+            }>
               <Form.Item
                 label="Transportation Preferences"
                 name="transportation"
@@ -130,9 +141,9 @@ const ServicesTransportStep = ({
                 </Select>
               </Form.Item>
 
-              <div style={{ backgroundColor: '#eff6ff', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
-                <Text strong style={{ color: '#1e40af' }}>Transportation Notes:</Text>
-                <ul style={{ paddingLeft: '20px', marginTop: '4px', marginBottom: 0, fontSize: '13px', color: '#4b5563' }}>
+              <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
+                <Text strong style={{ display: 'block', marginBottom: '8px', color: '#1e40af' }}>Transportation Notes:</Text>
+                <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '13px', color: '#4b5563' }}>
                   {formData.transportation?.includes('flight') && (
                     <li>Domestic flights are weather-dependent and may be delayed or canceled</li>
                   )}
@@ -145,7 +156,14 @@ const ServicesTransportStep = ({
               </div>
             </Card>
 
-            <Card className="step-card" title="Additional Services" style={{ marginBottom: '24px' }}>
+            <Card className="step-card" title={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="card-icon-wrapper">
+                  <ToolOutlined />
+                </div>
+                <span>Additional Services</span>
+              </div>
+            }>
               <Form.Item
                 name="insuranceRequired"
                 valuePropName="checked"
@@ -229,10 +247,22 @@ const ServicesTransportStep = ({
                 </div>
               )}
             </Card>
+          </div>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <Card
               className="step-card"
-              title="Why Choose Our Services?"
-              style={{ height: '100%' }}
+              style={{ marginTop: 0 }}
+              title={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div className="card-icon-wrapper">
+                    <HeartOutlined />
+                  </div>
+                  <span>Why Choose Us?</span>
+                </div>
+              }
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -275,8 +305,8 @@ const ServicesTransportStep = ({
 
                 <Divider style={{ margin: '8px 0' }} />
 
-                <div style={{ backgroundColor: '#fef3c7', padding: '16px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
-                  <Text strong style={{ color: '#d97706' }}>Important Notes:</Text>
+                <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <Text strong style={{ color: '#1e40af' }}>Important Notes:</Text>
                   <ul style={{ paddingLeft: '20px', marginTop: '8px', marginBottom: 0, fontSize: '13px', color: '#4b5563' }}>
                     <li>Travel insurance with emergency evacuation coverage is mandatory for all treks above 3,000m</li>
                     <li>Porter weight limit is strictly 25kg per porter (including their own gear)</li>
@@ -286,9 +316,9 @@ const ServicesTransportStep = ({
                   </ul>
                 </div>
 
-                <div style={{ backgroundColor: '#eff6ff', padding: '16px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                  <Text strong style={{ color: '#1d4ed8' }}>Need Assistance?</Text>
-                  <Paragraph style={{ marginTop: '4px', marginBottom: 0, fontSize: '14px', color: '#4b5563' }}>
+                <div style={{ backgroundColor: '#f0fdf4', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                  <Text strong style={{ color: '#166534' }}>Need Assistance?</Text>
+                  <Paragraph style={{ marginTop: '8px', marginBottom: 0, fontSize: '14px', color: '#4b5563' }}>
                     Our team is available to help you choose the right services for your trek.
                     Contact us for personalized recommendations based on your specific needs and preferences.
                   </Paragraph>

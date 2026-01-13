@@ -67,95 +67,91 @@ const GroupExperienceStep = ({ formData, onInputChange, groupTypes, experienceLe
 
       <Row gutter={[32, 24]}>
         <Col xs={24} md={12}>
-          <Card
-            className="step-card"
-            style={{ marginBottom: '24px' }}
-            title={
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div className="card-icon-wrapper">
-                  <UserOutlined />
-                </div>
-                <span>Group Information</span>
-              </div>
-            }
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <Form.Item
-                label="Group Size"
-                name="groupSize"
-                tooltip={{ title: "Number of people in your group", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-                rules={[{ required: true, message: 'Please enter group size' }]}
-              >
-                <InputNumber
-                  min={1}
-                  max={20}
-                  size="large"
-                  style={{ width: '100%' }}
-                  onChange={(value) => onInputChange('groupSize', value)}
-                  value={formData.groupSize}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label="Group Type"
-                name="groupType"
-                tooltip={{ title: "Select the category that best describes your group", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-                rules={[{ required: true, message: 'Please select group type' }]}
-              >
-                <Select
-                  size="large"
-                  onChange={(value) => onInputChange('groupType', value)}
-                  value={formData.groupType}
-                >
-                  {groupTypes.map(type => (
-                    <Option key={type.value} value={type.value}>
-                      {type.label}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                label="Age Range"
-                name="ageRange"
-                tooltip={{ title: "Age range of participants in your group", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
-              >
-                <div className="age-range-inputs">
-                  <InputNumber
-                    min={5}
-                    max={80}
-                    size="large"
-                    placeholder="Min"
-                    value={formData.ageRange?.min}
-                    onChange={(value) => onInputChange('ageRange', {
-                      ...formData.ageRange,
-                      min: value
-                    })}
-                  />
-                  <span className="separator">to</span>
-                  <InputNumber
-                    min={5}
-                    max={80}
-                    size="large"
-                    placeholder="Max"
-                    value={formData.ageRange?.max}
-                    onChange={(value) => onInputChange('ageRange', {
-                      ...formData.ageRange,
-                      max: value
-                    })}
-                  />
-                  <span className="separator">years</span>
-                </div>
-              </Form.Item>
-            </div>
-          </Card>
-        </Col>
-
-        <Col xs={24} md={12}>
-          <div style={{ position: 'sticky', top: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <Card
-              className="step-card"
-              style={{ marginBottom: '24px' }}
+              className="step-card group-info-card"
+              title={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div className="card-icon-wrapper">
+                    <UserOutlined />
+                  </div>
+                  <span>Group Information</span>
+                </div>
+              }
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <Form.Item
+                  label="Group Size"
+                  name="groupSize"
+                  tooltip={{ title: "Number of people in your group", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
+                  rules={[{ required: true, message: 'Please enter group size' }]}
+                >
+                  <InputNumber
+                    min={1}
+                    max={20}
+                    size="large"
+                    style={{ width: '100%' }}
+                    onChange={(value) => onInputChange('groupSize', value)}
+                    value={formData.groupSize}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Group Type"
+                  name="groupType"
+                  tooltip={{ title: "Select the category that best describes your group", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
+                  rules={[{ required: true, message: 'Please select group type' }]}
+                >
+                  <Select
+                    size="large"
+                    onChange={(value) => onInputChange('groupType', value)}
+                    value={formData.groupType}
+                  >
+                    {groupTypes.map(type => (
+                      <Option key={type.value} value={type.value}>
+                        {type.label}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item
+                  label="Age Range"
+                  name="ageRange"
+                  tooltip={{ title: "Age range of participants in your group", icon: <InfoCircleOutlined className="tooltip-icon" /> }}
+                >
+                  <div className="age-range-inputs">
+                    <InputNumber
+                      min={5}
+                      max={80}
+                      size="large"
+                      placeholder="Min"
+                      value={formData.ageRange?.min}
+                      onChange={(value) => onInputChange('ageRange', {
+                        ...formData.ageRange,
+                        min: value
+                      })}
+                    />
+                    <span className="separator">to</span>
+                    <InputNumber
+                      min={5}
+                      max={80}
+                      size="large"
+                      placeholder="Max"
+                      value={formData.ageRange?.max}
+                      onChange={(value) => onInputChange('ageRange', {
+                        ...formData.ageRange,
+                        max: value
+                      })}
+                    />
+                    <span className="separator">years</span>
+                  </div>
+                </Form.Item>
+              </div>
+            </Card>
+
+            <Card
+              className="step-card experience-fitness-card"
               title={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div className="card-icon-wrapper">
@@ -201,37 +197,23 @@ const GroupExperienceStep = ({ formData, onInputChange, groupTypes, experienceLe
                       <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
-                        marginBottom: '8px',
-                        fontSize: '13px',
-                        color: '#64748b'
+                        alignItems: 'center',
+                        marginBottom: '8px'
                       }}>
-                        <span>Experience Level</span>
-                        <span style={{ fontWeight: 600, color: '#4f46e5' }}>
+                        <Text strong>Experience Level:</Text>
+                        <Tag color="blue">
                           {experienceLevels.find(l => l.value === formData.experienceLevel)?.label}
-                        </span>
+                        </Tag>
                       </div>
                       <Progress
                         percent={getExperienceProgress(formData.experienceLevel)}
                         showInfo={false}
-                        strokeColor="#4f46e5"
-                        trailColor="#e0e7ff"
-                        className="experience-progress"
+                        strokeColor="#1a73e8"
+                        trailColor="#e2e8f0"
                       />
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: '11px',
-                        color: '#94a3b8',
-                        marginTop: '4px'
-                      }}>
-                        <span>Beginner</span>
-                        <span>Expert</span>
-                      </div>
                     </div>
                   )}
                 </div>
-
-                <Divider style={{ margin: '24px 0', borderColor: '#e2e8f0' }} />
 
                 {/* Fitness Level Section */}
                 <div>
@@ -259,36 +241,36 @@ const GroupExperienceStep = ({ formData, onInputChange, groupTypes, experienceLe
                   </Form.Item>
 
                   {formData.fitnessLevel && (
-                    <div style={{
-                      backgroundColor: '#f8fafc',
-                      borderRadius: '8px',
-                      padding: '16px',
-                      marginTop: '16px'
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: '8px'
-                      }}>
-                        <span style={{ fontSize: '13px', color: '#64748b' }}>Fitness Assessment:</span>
-                        <Tag
-                          color={getFitnessLevel(formData.fitnessLevel).color}
-                          className="fitness-tag"
-                        >
-                          {getFitnessLevel(formData.fitnessLevel).text}
-                        </Tag>
-                      </div>
-                      <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-                        {getFitnessTips(formData.fitnessLevel)}
-                      </div>
-                    </div>
+                    <Alert
+                      message={
+                        <div>
+                          <div style={{ marginBottom: '8px' }}>
+                            <Text strong>Fitness Assessment: </Text>
+                            <Tag color={getFitnessLevel(formData.fitnessLevel).color}>
+                              {getFitnessLevel(formData.fitnessLevel).text}
+                            </Tag>
+                          </div>
+                          <Text type="secondary">
+                            {getFitnessTips(formData.fitnessLevel)}
+                          </Text>
+                        </div>
+                      }
+                      type="info"
+                      showIcon
+                      icon={<HeartFilled />}
+                      style={{ marginTop: '16px' }}
+                    />
                   )}
                 </div>
               </div>
             </Card>
+          </div>
+        </Col>
+
+        <Col xs={24} md={12}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <Card
-              className="step-card"
+              className="step-card safety-recommendations-card"
               title={
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <SafetyOutlined style={{ color: '#ef4444', marginRight: '8px', fontSize: '18px' }} />
@@ -296,70 +278,75 @@ const GroupExperienceStep = ({ formData, onInputChange, groupTypes, experienceLe
                 </div>
               }
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <Alert
                   message="Altitude Sickness Warning"
                   description="Most treks in Nepal reach high altitudes. Proper acclimatization is crucial to prevent AMS (Acute Mountain Sickness)."
                   type="warning"
                   showIcon
+                  style={{ marginBottom: '4px' }}
                 />
 
                 <div style={{
                   backgroundColor: '#eff6ff',
-                  padding: '16px',
+                  padding: '12px',
                   borderRadius: '8px',
                   border: '1px solid #dbeafe'
                 }}>
-                  <div style={{ fontWeight: 500, color: '#1e40af', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
-                    <HeartFilled style={{ color: '#ef4444', marginRight: '8px' }} />
+                  <div style={{ fontWeight: 500, color: '#1e40af', marginBottom: '6px', display: 'flex', alignItems: 'center', fontSize: '13px' }}>
+                    <HeartFilled style={{ color: '#ef4444', marginRight: '6px', fontSize: '14px' }} />
                     Personalized Recommendations
                   </div>
-                  <ul style={{ paddingLeft: 0, listStyle: 'none', margin: 0, fontSize: '14px', color: '#374151' }}>
+                  <ul style={{ paddingLeft: 0, listStyle: 'none', margin: 0, fontSize: '12px', color: '#374151' }}>
                     {formData.experienceLevel === 'beginner' && (
-                      <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '8px' }}>
-                        <span style={{ color: '#10b981', marginRight: '8px' }}>✓</span>
+                      <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '4px' }}>
+                        <span style={{ color: '#10b981', marginRight: '6px', fontSize: '12px' }}>✓</span>
                         <span>Start with a shorter trek to acclimate to the altitude</span>
                       </li>
                     )}
                     {formData.ageRange?.max > 50 && (
-                      <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '8px' }}>
-                        <span style={{ color: '#10b981', marginRight: '8px' }}>✓</span>
+                      <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '4px' }}>
+                        <span style={{ color: '#10b981', marginRight: '6px', fontSize: '12px' }}>✓</span>
                         <span>Additional rest days for better acclimatization</span>
                       </li>
                     )}
                     {formData.groupType === 'family' && (
-                      <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '8px' }}>
-                        <span style={{ color: '#10b981', marginRight: '8px' }}>✓</span>
+                      <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '4px' }}>
+                        <span style={{ color: '#10b981', marginRight: '6px', fontSize: '12px' }}>✓</span>
                         <span>Family-friendly routes with shorter walking days</span>
                       </li>
                     )}
-                    <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '8px' }}>
-                      <span style={{ color: '#10b981', marginRight: '8px' }}>✓</span>
+                    <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '4px' }}>
+                      <span style={{ color: '#10b981', marginRight: '6px', fontSize: '12px' }}>✓</span>
                       <span>Proper travel insurance covering high-altitude trekking</span>
                     </li>
                     <li style={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <span style={{ color: '#10b981', marginRight: '8px' }}>✓</span>
+                      <span style={{ color: '#10b981', marginRight: '6px', fontSize: '12px' }}>✓</span>
                       <span>Pre-trek fitness preparation program</span>
                     </li>
                   </ul>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                     <div style={{
                       backgroundColor: '#dbeafe',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      marginRight: '12px',
-                      color: '#2563eb'
+                      padding: '6px',
+                      borderRadius: '6px',
+                      marginRight: '10px',
+                      color: '#2563eb',
+                      minWidth: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px'
                     }}>
                       <SafetyOutlined />
                     </div>
-                    <div>
-                      <Text strong style={{ display: 'block', marginBottom: '4px' }}>Safety First</Text>
-                      <Paragraph style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>
-                        Our guides are trained in wilderness first aid and carry comprehensive first aid kits.
-                        We monitor altitude sickness symptoms and have emergency evacuation plans in place.
+                    <div style={{ flex: 1 }}>
+                      <Text strong style={{ display: 'block', marginBottom: '2px', fontSize: '13px' }}>Safety First</Text>
+                      <Paragraph style={{ fontSize: '12px', color: '#4b5563', margin: 0, lineHeight: 1.4 }}>
+                        Our guides are trained in wilderness first aid and carry comprehensive first aid kits. We monitor altitude sickness symptoms and have emergency evacuation plans in place.
                       </Paragraph>
                     </div>
                   </div>
@@ -367,18 +354,22 @@ const GroupExperienceStep = ({ formData, onInputChange, groupTypes, experienceLe
                   <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                     <div style={{
                       backgroundColor: '#dcfce7',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      marginRight: '12px',
-                      color: '#16a34a'
+                      padding: '6px',
+                      borderRadius: '6px',
+                      marginRight: '10px',
+                      color: '#16a34a',
+                      minWidth: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px'
                     }}>
                       <HeartOutlined />
                     </div>
-                    <div>
-                      <Text strong style={{ display: 'block', marginBottom: '4px' }}>Responsible Tourism</Text>
-                      <Paragraph style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>
-                        We follow Leave No Trace principles, support local communities, and ensure fair treatment
-                        and proper equipment for all our staff.
+                    <div style={{ flex: 1 }}>
+                      <Text strong style={{ display: 'block', marginBottom: '2px', fontSize: '13px' }}>Responsible Tourism</Text>
+                      <Paragraph style={{ fontSize: '12px', color: '#4b5563', margin: 0, lineHeight: 1.4 }}>
+                        We follow Leave No Trace principles, support local communities, and ensure fair treatment and proper equipment for all our staff.
                       </Paragraph>
                     </div>
                   </div>
@@ -386,39 +377,31 @@ const GroupExperienceStep = ({ formData, onInputChange, groupTypes, experienceLe
                   <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                     <div style={{
                       backgroundColor: '#fef3c7',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      marginRight: '12px',
-                      color: '#d97706'
+                      padding: '6px',
+                      borderRadius: '6px',
+                      marginRight: '10px',
+                      color: '#d97706',
+                      minWidth: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px'
                     }}>
                       <ToolOutlined />
                     </div>
-                    <div>
-                      <Text strong style={{ display: 'block', marginBottom: '4px' }}>Quality Equipment</Text>
-                      <Paragraph style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>
-                        We use high-quality, well-maintained equipment for all our treks. Tents, sleeping bags,
-                        and other gear are regularly inspected and replaced as needed.
+                    <div style={{ flex: 1 }}>
+                      <Text strong style={{ display: 'block', marginBottom: '2px', fontSize: '13px' }}>Quality Equipment</Text>
+                      <Paragraph style={{ fontSize: '12px', color: '#4b5563', margin: 0, lineHeight: 1.4 }}>
+                        We use high-quality, well-maintained equipment for all our treks. Tents, sleeping bags, and other gear are regularly inspected and replaced as needed.
                       </Paragraph>
                     </div>
                   </div>
                 </div>
-
-                <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
-                  <div style={{ fontWeight: 500, color: '#1f2937', marginBottom: '8px' }}>Need help choosing?</div>
-                  <Paragraph style={{ fontSize: '14px', color: '#4b5563', margin: 0 }}>
-                    Our trekking experts can help you select the perfect trek based on your group's
-                    experience and fitness levels. Contact us for personalized recommendations.
+                <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px' }}>
+                  <div style={{ fontWeight: 500, color: '#1f2937', marginBottom: '4px', fontSize: '13px' }}>Need help choosing?</div>
+                  <Paragraph style={{ fontSize: '12px', color: '#4b5563', margin: 0, lineHeight: 1.4 }}>
+                    Our trekking experts can help you select the perfect trek based on your group's experience and fitness levels. Contact us for personalized recommendations.
                   </Paragraph>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="step-card" style={{ marginTop: '24px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2.25rem', fontWeight: 700, color: '#2563eb', marginBottom: '8px' }}>24/7</div>
-                <div style={{ color: '#4b5563', marginBottom: '12px' }}>Support Available</div>
-                <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                  Have questions? Our team is here to help you plan your perfect trekking adventure.
                 </div>
               </div>
             </Card>
