@@ -1,0 +1,36 @@
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Nav link loading state */
+.nav__link--loading {
+  position: relative;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.nav__link--loading .nav-link-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav__link--loading .fa-spin {
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+/* Smooth transitions */
+.nav__link {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.nav__link:hover {
+  opacity: 0.8;
+}
+
+.nav__link--loading:hover {
+  opacity: 0.8;
+}

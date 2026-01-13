@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/api';
 import UserDropdown from './UserDropdown';
 import './Header.css';
+import '../../styles/animations.css';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -10,6 +11,7 @@ const Header = () => {
   const [logoError, setLogoError] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loadingNavItem, setLoadingNavItem] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
@@ -147,28 +149,47 @@ const Header = () => {
 
           <nav className={`nav ${mobileMenuOpen ? 'nav--mobile-open' : ''}`}>
             <ul className="nav__list">
-              {['Destinations', 'Guides', 'Experiences', 'About', 'Contact', 'Blog'].map((item) => {
+              {['Regions', 'Guides', 'Experiences', 'About', 'Contact', 'Blog'].map((item) => {
                 const isAnchor = item === 'Experiences';
-                const path = isAnchor ? '/#experiences' : `/${item.toLowerCase()}`;
+                const path = isAnchor ? '/#experiences' : item.toLowerCase() === 'regions' ? '/destinations' : `/${item.toLowerCase()}`;
                 const isActive = isAnchor
                   ? (activeSection === 'experiences' && isHomePage)
                   : location.pathname === path;
+                const isLoading = loadingNavItem === item;
 
                 return (
                   <li key={item} className="nav__item">
                     <Link
                       to={path}
-                      className={`nav__link ${isActive ? 'nav__link--active' : ''}`}
+                      className={`nav__link ${isActive ? 'nav__link--active' : ''} ${isLoading ? 'nav__link--loading' : ''}`}
                       onClick={(e) => {
+                        if (isLoading) {
+                          e.preventDefault();
+                          return;
+                        }
+                        
                         if (isAnchor) {
                           handleNavigation('experiences', e);
                         } else {
+                          setLoadingNavItem(item);
                           if (mobileMenuOpen) setMobileMenuOpen(false);
                           setActiveSection(''); // Clear active section when navigating to pages
+                          
+                          // Add a small delay to ensure the loading state is shown
+                          setTimeout(() => {
+                            setLoadingNavItem(null);
+                          }, 300);
                         }
                       }}
                     >
-                      {item}
+                      {isLoading ? (
+                        <span className="nav-link-content">
+                          <i className="fas fa-mountain fa-spin" style={{ marginRight: '8px' }}></i>
+                          {item}
+                        </span>
+                      ) : (
+                        <span className="nav-link-content">{item}</span>
+                      )}
                     </Link>
                   </li>
                 );
@@ -179,10 +200,25 @@ const Header = () => {
           <div className="header__actions">
             <Link
               to="/custom-trip"
-              className="nav__link"
-              onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              className={`nav__link ${loadingNavItem === 'custom-trip' ? 'nav__link--loading' : ''}`}
+              onClick={(e) => {
+                if (loadingNavItem === 'custom-trip') {
+                  e.preventDefault();
+                  return;
+                }
+                setLoadingNavItem('custom-trip');
+                if (mobileMenuOpen) setMobileMenuOpen(false);
+                setTimeout(() => setLoadingNavItem(null), 300);
+              }}
             >
-              Custom Trip
+              {loadingNavItem === 'custom-trip' ? (
+                <span className="nav-link-content">
+                  <i className="fas fa-mountain fa-spin" style={{ marginRight: '8px' }}></i>
+                  Custom Trip
+                </span>
+              ) : (
+                <span className="nav-link-content">Custom Trip</span>
+              )}
             </Link>
 
             {isAuthenticated && user ? (
@@ -193,10 +229,25 @@ const Header = () => {
             ) : (
               <Link
                 to="/auth"
-                className="nav__link"
-                onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
+                className={`nav__link ${loadingNavItem === 'auth' ? 'nav__link--loading' : ''}`}
+                onClick={(e) => {
+                  if (loadingNavItem === 'auth') {
+                    e.preventDefault();
+                    return;
+                  }
+                  setLoadingNavItem('auth');
+                  if (mobileMenuOpen) setMobileMenuOpen(false);
+                  setTimeout(() => setLoadingNavItem(null), 300);
+                }}
               >
-                Sign In
+                {loadingNavItem === 'auth' ? (
+                  <span className="nav-link-content">
+                    <i className="fas fa-mountain fa-spin" style={{ marginRight: '8px' }}></i>
+                    Sign In
+                  </span>
+                ) : (
+                  <span className="nav-link-content">Sign In</span>
+                )}
               </Link>
             )}
           </div>
