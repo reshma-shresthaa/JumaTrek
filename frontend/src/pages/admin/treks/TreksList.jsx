@@ -30,9 +30,44 @@ import { adminService } from '../../../services/adminApi';
 const { Search } = Input;
 const { Option } = Select;
 
+const useMediaQuery = (query) => {
+  const getMatches = () => {
+    if (typeof window === 'undefined' || typeof window.matchMedia === 'undefined') return false;
+    return window.matchMedia(query).matches;
+  };
+
+  const [matches, setMatches] = useState(getMatches);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia === 'undefined') return;
+
+    const mediaQueryList = window.matchMedia(query);
+    const listener = (event) => setMatches(event.matches);
+
+    setMatches(mediaQueryList.matches);
+    if (mediaQueryList.addEventListener) {
+      mediaQueryList.addEventListener('change', listener);
+    } else {
+      mediaQueryList.addListener(listener);
+    }
+
+    return () => {
+      if (mediaQueryList.removeEventListener) {
+        mediaQueryList.removeEventListener('change', listener);
+      } else {
+        mediaQueryList.removeListener(listener);
+      }
+    };
+  }, [query]);
+
+  return matches;
+};
+
 const TreksList = () => {
   const [loading, setLoading] = useState(false);
   const [treks, setTreks] = useState([]);
+  const isMd = useMediaQuery('(min-width: 768px)');
+  const [searchValue, setSearchValue] = useState('');
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -135,7 +170,7 @@ const TreksList = () => {
       dataIndex: 'title',
       key: 'title',
       render: (text, record) => (
-        <Link to={`/admin/treks/view/${record._id}`} className="font-medium">
+        <Link to={`/admin/treks/view/${record._id}`} style={{ fontWeight: 500 }}>
           {text}
         </Link>
       ),
@@ -219,24 +254,62 @@ const TreksList = () => {
   ];
 
   return (
-    <div className="treks-list">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold">Manage Treks</h2>
-        <p className="text-gray-500">View and manage all treks in the system</p>
+    <div style={{ width: '100%' }}>
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600 }}>Manage Treks</h2>
+        <p style={{ color: '#6b7280' }}>View and manage all treks in the system</p>
       </div>
 
-      <Card className="mb-6">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <div className="w-full md:w-1/3">
-            <Search
-              placeholder="Search treks..."
-              allowClear
-              enterButton={<Button type="primary" icon={<SearchOutlined />} />}
-              onSearch={handleSearch}
-              size="large"
-            />
+      <Card style={{ marginBottom: 24 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: isMd ? 'row' : 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+            marginBottom: 24,
+          }}
+        >
+          <div style={{ width: isMd ? '33.3333%' : '100%' }}>
+            <div style={{ width: '100%', display: 'flex' }}>
+              <Input
+                placeholder="Search treks..."
+                allowClear
+                size="large"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onPressEnter={() => handleSearch(searchValue)}
+                style={{
+                  flex: 1,
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                }}
+              />
+              <Button
+                type="primary"
+                size="large"
+                icon={<SearchOutlined />}
+                onClick={() => handleSearch(searchValue)}
+                style={{
+                  width: 48,
+                  paddingInline: 0,
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                }}
+              />
+            </div>
           </div>
-          <div className="flex flex-wrap gap-3 justify-end items-center w-full md:w-2/3">
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 12,
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              width: isMd ? '66.6667%' : '100%',
+            }}
+          >
             <Select
               placeholder="Filter by difficulty"
               style={{ width: 160 }}
@@ -276,6 +349,7 @@ const TreksList = () => {
                   difficulty: 'all',
                   region: 'all',
                 });
+                setSearchValue('');
               }}
             >
               Reset

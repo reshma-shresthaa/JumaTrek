@@ -22,7 +22,7 @@ const Dashboard = () => {
     totalUsers: 0,
     totalTreks: 0,
     totalBookings: 0,
-    activeGuides: 0,
+    totalGuides: 0,
     revenue: 0,
     conversionRate: 0,
   });
@@ -51,12 +51,16 @@ const Dashboard = () => {
     try {
       // Fetch dashboard stats
       const statsResponse = await adminService.getDashboardStats();
+      // Fetch guides data
+      const guidesResponse = await adminService.getGuides();
+      const totalGuides = guidesResponse?.data?.length || 0;
+      
       if (statsResponse.success) {
         setStats({
           totalUsers: statsResponse.data.totalUsers || 0,
           totalTreks: statsResponse.data.totalListings || 0,
           totalBookings: statsResponse.data.totalBookings || 0,
-          activeGuides: statsResponse.data.totalAdmins || 0, // Assuming admins are guides for now
+          totalGuides: totalGuides,
           revenue: 0, // This would come from a different endpoint
           conversionRate: statsResponse.data.totalBookings > 0 ? 
             Math.round((statsResponse.data.confirmedBookings / statsResponse.data.totalBookings) * 100) : 0,
@@ -287,13 +291,18 @@ const Dashboard = () => {
         <Col xs={24} sm={12} md={6}>
           <Card>
             <Statistic
-              title="Active Guides"
-              value={stats.activeGuides}
-              prefix={<TeamOutlined />}
+              title="Total Guides"
+              value={stats.totalGuides}
+              prefix={<TeamOutlined style={{ color: '#722ed1' }} />}
+              suffix={
+                <Tag color="purple" style={{ marginLeft: '8px' }}>
+                  <ArrowUpOutlined /> 8%
+                </Tag>
+              }
             />
             <div style={{ marginTop: '8px' }}>
               <Progress percent={100} size="small" status="active" showInfo={false} />
-              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Active team members</div>
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>Total registered guides</div>
             </div>
           </Card>
         </Col>

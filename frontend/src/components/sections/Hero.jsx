@@ -42,7 +42,7 @@ const Hero = () => {
               />
             </div>
             <button type="submit" className="hero-search-btn">
-              Get Started
+              Search
             </button>
           </form>
         </div>
